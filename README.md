@@ -1,8 +1,6 @@
 # CSCI2720_proj
 
-CSCI2720 project outline
-
-Group members
+## Group members
 
 1155143373 Lam Lok Hin
 
@@ -17,9 +15,9 @@ Group members
 1155143825 Lam Cheuk Hin
 
 
-Data source : WeatherAPI.com
+## Data source : WeatherAPI.com
 
-Schemas:
+## Schemas:
 
 Location
 	name: string
@@ -56,25 +54,25 @@ Comment
 	content: string
 	
 
-APIs to be used:
+## APIs to be used:
 
 	Google Maps
 	
 	WeatherAPI
 
 
-Reason for choosing WeatherAPI
+## Reason for choosing WeatherAPI
 
-Accept real time or current JSON weather
+- Accept real time or current JSON weather
 
-Mapping of locations between geodata and the API is not needed
+- Mapping of locations between geodata and the API is not needed
 
-The API will only access data of the requested location, unlike the first two APIs which will return data from all locations.
-
-
+- The API will only access data of the requested location, unlike the first two APIs which will return data from all locations.
 
 
-Work distribution
+
+
+## Work distribution
 
 Front End
 
