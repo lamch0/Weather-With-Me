@@ -13,6 +13,7 @@ const initializePassport = require('./utils/passport-config')
 initializePassport(
   passport,
 //   email => users.find(user => user.email === email),
+  username => users.find(user => user.username === username),
   id => users.find(user => user.id === id)
 )
 
@@ -32,7 +33,7 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { name: req.user.name })
+  res.render('profile.ejs', { username: req.user.username })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -54,7 +55,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
     users.push({
       id: Date.now().toString(),
-      name: req.body.name,
+      username: req.body.username,
     //   email: req.body.email,
       password: hashedPassword
     })
