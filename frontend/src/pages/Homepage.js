@@ -8,8 +8,7 @@ import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
 import Table from 'react-bootstrap/Table';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom' 
-import userEvent from '@testing-library/user-event';
+
 
 
 const location_data=[  
@@ -34,8 +33,8 @@ const location_data=[
         "region": "Europe",
         "country": "France",
         "name": "Paris",
-        "lat": "60.507359",
-        "lng": "-0.136439",
+        "lat": "48.864716",
+        "lng": "2.34",
         "timezone_id":"1"
       }
 ]
@@ -69,11 +68,19 @@ function Homepage() {
     
     <div className="search">
       <div id="icon"><Ai.AiOutlineSearch /></div>
-          <input id="bar" type="text" placeholder="Search..." onChange={(e)=>{
+      <input id="bar" type="text" placeholder="Search..." onChange={(e)=>{
                     let SearchItemsLowerCase = e.target.value.toLowerCase();
                     setSearchItems(SearchItemsLowerCase);}}/>
-              </div>
-              <Location_Table input={SearchItems}/>
+      <select name="search_field" id="search_field">
+      <option value="region">Region</option>
+      <option value="country">Country</option>
+      <option value="name">Name</option>
+      <option value="lat">Latitude</option>
+      <option value="lng">Longitude</option>
+      <option value="timezone_id">Timezone</option>
+      </select>
+    </div>
+    <Location_Table input={SearchItems}/>
     </>
   )
 }
@@ -114,15 +121,28 @@ class SimpleMap extends Component {
 function Location_Table(props){
   const [location, setlocation]=useState(location_data)
 
-
+  let search_field=document.getElementById("search_field").value;
   const matchData = location.filter((items) => {
     if (props.input === '') {
         return items;
     }
-    else {
-
+    else if(search_field=="region"){
         return items.region.toLowerCase().includes(props.input);
-
+    }
+    else if(search_field=="country"){
+      return items.country.toLowerCase().includes(props.input);
+    }
+    else if(search_field=="name"){
+      return items.name.toLowerCase().includes(props.input);
+    }
+    else if(search_field=="lat"){
+      return items.lat.toLowerCase().includes(props.input);
+    }
+    else if(search_field=="lng"){
+      return items.lng.toLowerCase().includes(props.input);
+    }
+    else if(search_field=="timezone_id"){
+      return items.timezone_id.toLowerCase().includes(props.input);
     }
 })
 
@@ -173,6 +193,8 @@ function Location_Table(props){
               <td>{item.lat}</td>
               <td>{item.lng}</td>
               <td>{item.timezone_id}</td>
+              <td>button</td>
+              <td>button</td>
             </tr>
           </tbody>
           );
