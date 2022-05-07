@@ -16,12 +16,12 @@
 }
 .banner #icon{
     font-size: 3.3vw;
-    padding-left: 6vw;
+    padding-left: 13vw;
     padding-top: 1.3vh;
 }
 .banner-right{
     display: flex;
-    padding-left: 41.7vw;
+    padding-left: 35.5vw;
 }
 .banner-right #icon{
     font-size: 1.3vw;
