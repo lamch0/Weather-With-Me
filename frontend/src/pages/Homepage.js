@@ -27,15 +27,23 @@ const location_data=[
         "name": "London",
         "lat": "51.507359",
         "lng": "-0.136439",
-        "timezone_id":"1"
+        "timezone_id":"0"
       },{
-        "id":124,
+        "id":125,
         "region": "Europe",
         "country": "France",
         "name": "Paris",
         "lat": "48.864716",
         "lng": "2.34",
-        "timezone_id":"1"
+        "timezone_id":"0"
+      },{
+        "id":126,
+        "region": "North America",
+        "country": "USA",
+        "name": "New York",
+        "lat": "40.7",
+        "lng": "-73.9",
+        "timezone_id":"-5"
       }
 ]
 function Homepage() {
@@ -116,32 +124,35 @@ class SimpleMap extends Component {
   }
 }
 
+function get_field(){
+  return document.getElementById("search_field").value;
+}
 
 
 function Location_Table(props){
   const [location, setlocation]=useState(location_data)
 
-  let search_field=document.getElementById("search_field").value;
+  
   const matchData = location.filter((items) => {
     if (props.input === '') {
         return items;
     }
-    else if(search_field=="region"){
+    else if(get_field()==="region"){
         return items.region.toLowerCase().includes(props.input);
     }
-    else if(search_field=="country"){
+    else if(get_field()==="country"){
       return items.country.toLowerCase().includes(props.input);
     }
-    else if(search_field=="name"){
+    else if(get_field()==="name"){
       return items.name.toLowerCase().includes(props.input);
     }
-    else if(search_field=="lat"){
+    else if(get_field()==="lat"){
       return items.lat.toLowerCase().includes(props.input);
     }
-    else if(search_field=="lng"){
+    else if(get_field()==="lng"){
       return items.lng.toLowerCase().includes(props.input);
     }
-    else if(search_field=="timezone_id"){
+    else if(get_field()==="timezone_id"){
       return items.timezone_id.toLowerCase().includes(props.input);
     }
 })
@@ -150,7 +161,7 @@ function Location_Table(props){
 
   
   const [order, setorder]=useState("ASC")
-  const sorting=(col)=>{
+  const sorting_char=(col)=>{
     if (order==="ASC"){
       const sorted=[...location].sort((a,b)=>
       a[col].toLowerCase()>b[col].toLowerCase()? 1:-1
@@ -166,6 +177,22 @@ function Location_Table(props){
       setorder("ASC");
     }
   }
+  const sorting_int=(col)=>{
+    if (order==="ASC"){
+      const sorted=[...location].sort((a,b)=>
+      a[col]>b[col]? 1:-1
+      );
+      setlocation(sorted);
+      setorder("DSC");
+    }
+    if (order==="DSC"){
+      const sorted=[...location].sort((a,b)=>
+      a[col]<b[col]? 1:-1
+      );
+      setlocation(sorted);
+      setorder("ASC");
+    }
+  }
     return(
     <>
     
@@ -173,12 +200,12 @@ function Location_Table(props){
       <Table striped bordered hover>
       <thead>
           <tr>
-            <th id="table_title" onClick={()=>sorting("region")}>region</th>
-            <th id="table_title" onClick={()=>sorting("country")}>Country</th>
-            <th id="table_title" onClick={()=>sorting("name")}>name</th>
-            <th id="table_title" onClick={()=>sorting("lat")}>Latitude</th>
-            <th id="table_title" onClick={()=>sorting("lat")}>Longitude</th>
-            <th id="table_title" onClick={()=>sorting("lng")}>timezone</th>
+            <th id="table_title" onClick={()=>sorting_char("region")}>region</th>
+            <th id="table_title" onClick={()=>sorting_char("country")}>Country</th>
+            <th id="table_title" onClick={()=>sorting_char("name")}>name</th>
+            <th id="table_title" onClick={()=>sorting_int("lat")}>Latitude</th>
+            <th id="table_title" onClick={()=>sorting_int("lng")}>Longitude</th>
+            <th id="table_title" onClick={()=>sorting_int("timezone_id")}>timezone</th>
             <th id="table_title">Weather Information</th>
             <th id="table_title">Add to Favourite</th>
           </tr>
