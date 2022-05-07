@@ -77,6 +77,14 @@
     font-size: 1.7189514396218306vw;
 }
 
+#search_field{
+    padding-right: 1vw;
+    height: 3.5vh;
+    margin-top: 0.2vh;
+    margin-left: 0.7vw;
+    border-radius: 0.3vw;
+
+}
 #pin{
     position: absolute;
     top: 100%;
@@ -86,7 +94,8 @@
 
 #table_title{
     background-color: #89C4F4;
-}
-#table_title{
     cursor: pointer;
+}
+#table_title:hover{
+    background-color: #4B77BE;
 }
