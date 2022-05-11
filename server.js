@@ -124,4 +124,82 @@ app.post('/addlocation', (req, res) => {
 	)
 })
 
+//Update Location (admin only)
+app.put("/location/:loc_id/update",(req,res)=>{
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'user_id username user_type')
+    .exec(
+      (err,e)=>{
+        if(err)
+          {res.send(err);}
+        else{
+          if(e.user_type != "admin"){
+            res,set('Content-Type','text/plain');
+            res.status(404).send("Only admin can update the lcoation.");
+          }
+          else{
+            Location.findOne({loc_id: req.body['update_loc_id']},(err, l)=>{
+              if(err)
+                {res.send(err);}
+              else{
+                l.name = req.body['updatedname'];
+                l.lat = req.body['updatelat'];
+                l.lon = req.body['updatelon'];
+                l.save();
+                res.send("{<br>"+ 
+                '"loc_id": '+l.loc_Id+",<br>" + 
+                '"name": "' + l.name + '",<br>' +
+                '"lat":'+ l.lat +'",<br>' +
+                '"loc":'+ l.lon +'"<br>' +
+                ',<br>');
+              }
+            })
+          }
+        }
+      }
+    )
+})
+// End of the update section =======================================================================
+// Delete Location (admin only)
+app.delete("/location/:loc_id/delete",(req,res)=>{
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'user_id username user_type')
+    .exec(
+      (err,e)=>{
+        if(err)
+          {res.send(err);}
+        else {
+          if(e.user_type != "admin"){
+            res.set('Content-Type','text/plain');
+            res.status(404).send("Only admin can delete the location.");
+          }
+          else{
+            Location.findOne({loc_id:req.body['loc_id']},(err,loc)=>{
+              if(err)
+               {res.send(err);}
+              else{
+                if(loc == null){
+                  res.set('Content-Type','text/plain');
+                  res.status(404).send("Could not FIND the location id delete.");
+                }
+                else{
+                  Location.remove({loc_id: req.params['loc_id']},(err,loc1)=>{
+                    if (err)
+                    {res.send(err);}
+                    else{
+                      res.status(204).send(loc1)
+                    }
+                  })
+                }
+              }
+            })
+          }
+        }
+      }
+    )
+})
+//===========================End Delete location part=====================================
+
 app.listen(3000)
