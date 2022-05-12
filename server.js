@@ -202,4 +202,62 @@ app.delete("/location/:loc_id/delete",(req,res)=>{
 })
 //===========================End Delete location part=====================================
 
+// Get all locations
+app.get('/locations', (req, res) => {
+  Location.find({})
+  .exec(function (err, loc) {
+      let locationList = ""
+      if (err)
+          res.send(err);
+      else
+          for (let i = 0; i < loc.length; i++) {
+              locationList += "{<br>\n" +
+                              "\"loc_id\": " + loc[i].loc_id + ",<br>\n" +
+                              "\"name\": \"" + loc[i].name + "\",<br>\n" +
+                              "\"lat\": " + loc[i].lat + "<br>\n" +
+                              "\"lon\": " + loc[i].lon + "<br>\n" +
+                              "}"
+              if (i < loc.length - 1) {
+                  locationList += ",<br>\n"
+              }
+          }
+          if (locationList.length > 0) {
+              res.send(
+                  "[<br>\n" +
+                  locationList +
+                  "<br>\n]"
+              );
+          } else {
+              res.send(
+                  "[ ]"
+              );
+          }
+  });
+});
+//===========================End Get all locations part=====================================
+
+// Get one location
+app.get('/location/:name', (req, res) => {
+  Location.findOne({ name: req.params["name"] })
+      .exec(function (err, loc) {
+          if (err)
+              res.send(err);
+          if (!loc) {
+              res.status(404)
+              res.send("Can't Find This Location")
+          }
+          else
+              res.send(
+                "{<br>\n" +
+                "\"loc_id\": " + loc.loc_id + ",<br>\n" +
+                "\"name\": \"" + loc.name + "\",<br>\n" +
+                "\"lat\": " + loc.lat + "<br>\n" +
+                "\"lon\": " + loc.lon + "<br>\n" +
+                "}"
+              );
+      })
+});
+//===========================End Get one location part=====================================
+
 app.listen(3000)
+
