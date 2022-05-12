@@ -131,7 +131,7 @@ app.post("/location",(req,res)=>{
   sort({loc_id: -1})
   .exec((err,e)=>{
     if (err)
-      {res.send(err);}
+      {res.send(err)}
     else{
       if(e.length == 0){
         new_location_id = 1;
@@ -147,22 +147,23 @@ app.post("/location",(req,res)=>{
           comments: []
         },(err,e)=>{
           if(err)
-            {res.send(err);}
+            return handleError(err)
           else{
-            Location.findOne({loc_id: new_location_id}),(err,e)=>{
+            Location.findOne({loc_id: new_location_id}).populate('comments').exec((err,loc)=>{
               if(err)
-                {res.send(err);}
+                {res.send(err)}
               else{
-                res.set("Location","http://localhost:8000/location/"+ new_location_id);
-                res.status(201).send(
-                  "loc_id:" + e.loc_id +",<br>"+
-                  '"name": "' + e.name + '",<br>'+
-                  "lat:" + e.lat + ",<br>"+
-                  "lon:" + e.lon+",<br>"+
-                  "comments: " + e.comments + "<br>"
-                );
+                //res.set("Location","http://localhost:8000/location/"+ new_location_id);
+                res.send(
+                  "loc_id: " + loc.loc_id +",<br>"+
+                  'name: "' + loc.name + '",<br>'+
+                  "lat: " + loc.lat + ",<br>"+
+                  "lon: " + loc.lon+",<br>"+
+                  // "comments: " + loc.comments + 
+                  "<br>"
+                )
               }
-            }
+            })
           }
         })
     }
@@ -175,7 +176,6 @@ app.get('/location/:loc_id',(req,res)=>{
     {loc_id: req.params['loc_id']},
   'loc_id name lat lon comments')
   .populate('comments','comment_id content')
-  //.populate('user', 'user_id username')
   .exec(
     (err,e)=>{
       if(err)
