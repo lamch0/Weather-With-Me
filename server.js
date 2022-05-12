@@ -109,6 +109,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
   }
 })
 
+// Logging out from the session
 app.delete('/logout', (req, res) => {
   req.session.destroy(() => {
     console.log('session destroyed')
@@ -131,6 +132,7 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
+// End of account management (login logout register) section ===========================================
 
 // add new location to the database
 app.post('/addlocation', (req, res) => {
@@ -240,56 +242,80 @@ app.delete("/location/:loc_id/delete",(req,res)=>{
 app.get('/locations', (req, res) => {
   Location.find({})
   .exec(function (err, loc) {
-      let locationList = ""
-      if (err)
-          res.send(err);
-      else
-          for (let i = 0; i < loc.length; i++) {
-              locationList += "{<br>\n" +
-                              "\"loc_id\": " + loc[i].loc_id + ",<br>\n" +
-                              "\"name\": \"" + loc[i].name + "\",<br>\n" +
-                              "\"lat\": " + loc[i].lat + "<br>\n" +
-                              "\"lon\": " + loc[i].lon + "<br>\n" +
-                              "}"
-              if (i < loc.length - 1) {
-                  locationList += ",<br>\n"
-              }
-          }
-          if (locationList.length > 0) {
-              res.send(
-                  "[<br>\n" +
-                  locationList +
-                  "<br>\n]"
-              );
-          } else {
-              res.send(
-                  "[ ]"
-              );
-          }
+    if (err)
+      res.send(err)
+    else 
+      res.send(loc)  
+    // console.log(loc)
+    // let locationList = ""
+    // if (err)
+    //     res.send(err);
+    // else
+    //     for (let i = 0; i < loc.length; i++) {
+    //         locationList += "{<br>\n" +
+    //                         "\"loc_id\": " + loc[i].loc_id + ",<br>\n" +
+    //                         "\"name\": \"" + loc[i].name + "\",<br>\n" +
+    //                         "\"lat\": " + loc[i].lat + "<br>\n" +
+    //                         "\"lon\": " + loc[i].lon + "<br>\n" +
+    //                         "}"
+    //         if (i < loc.length - 1) {
+    //             locationList += ",<br>\n"
+    //         }
+    //     }
+    //     if (locationList.length > 0) {
+    //         res.send(
+    //             "[<br>\n" +
+    //             locationList +
+    //             "<br>\n]"
+    //         );
+    //     } else {
+    //         res.send(
+    //             "[ ]"
+    //         );
+    //     }
   });
 });
 //===========================End Get all locations part=====================================
 
-// Get one location
-app.get('/location/:name', (req, res) => {
-  Location.findOne({ name: req.params["name"] })
-      .exec(function (err, loc) {
-          if (err)
-              res.send(err);
-          if (!loc) {
-              res.status(404)
-              res.send("Can't Find This Location")
-          }
-          else
-              res.send(
-                "{<br>\n" +
-                "\"loc_id\": " + loc.loc_id + ",<br>\n" +
-                "\"name\": \"" + loc.name + "\",<br>\n" +
-                "\"lat\": " + loc.lat + "<br>\n" +
-                "\"lon\": " + loc.lon + "<br>\n" +
-                "}"
-              );
-      })
+// Get one location by name
+app.get('/location/name?', (req, res) => {
+  Location.findOne(
+    { name: req.query["name"] }, (err, loc) => {
+        if (err)
+            res.send(err);
+        if (!loc) {
+            res.status(404)
+            res.send("Can't find this location")
+        }
+        else
+            res.send(loc)
+            // res.send(
+            //   "{<br>\n" +
+            //   "\"loc_id\": " + loc.loc_id + ",<br>\n" +
+            //   "\"name\": \"" + loc.name + "\",<br>\n" +
+            //   "\"lat\": " + loc.lat + "<br>\n" +
+            //   "\"lon\": " + loc.lon + "<br>\n" +
+            //   "}"
+            // );
+    }
+  )
+});
+
+// Get one location by loc_id
+app.get('/location/id?', (req, res) => {
+  // console.log(req.query["id"])
+  Location.findOne(
+    { loc_id: req.query["id"] }, (err, loc) => {
+      if (err)
+        res.send(err);
+      if (!loc) {
+        res.status(404)
+        res.send("Can't find this location")
+      }
+      else  
+        res.send(loc)
+    }
+  )
 });
 //===========================End Get one location part=====================================
 
