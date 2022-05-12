@@ -124,4 +124,139 @@ app.post('/addlocation', (req, res) => {
 	)
 })
 
+//Update Location (admin only)
+app.put("/location/:loc_id/update",(req,res)=>{
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'user_id username user_type')
+    .exec(
+      (err,e)=>{
+        if(err)
+          {res.send(err);}
+        else{
+          if(e.user_type != "admin"){
+            res,set('Content-Type','text/plain');
+            res.status(404).send("Only admin can update the lcoation.");
+          }
+          else{
+            Location.findOne({loc_id: req.body['update_loc_id']},(err, l)=>{
+              if(err)
+                {res.send(err);}
+              else{
+                l.name = req.body['updatedname'];
+                l.lat = req.body['updatelat'];
+                l.lon = req.body['updatelon'];
+                l.save();
+                res.send("{<br>"+ 
+                '"loc_id": '+l.loc_Id+",<br>" + 
+                '"name": "' + l.name + '",<br>' +
+                '"lat":'+ l.lat +'",<br>' +
+                '"loc":'+ l.lon +'"<br>' +
+                ',<br>');
+              }
+            })
+          }
+        }
+      }
+    )
+})
+// End of the update section =======================================================================
+// Delete Location (admin only)
+app.delete("/location/:loc_id/delete",(req,res)=>{
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'user_id username user_type')
+    .exec(
+      (err,e)=>{
+        if(err)
+          {res.send(err);}
+        else {
+          if(e.user_type != "admin"){
+            res.set('Content-Type','text/plain');
+            res.status(404).send("Only admin can delete the location.");
+          }
+          else{
+            Location.findOne({loc_id:req.body['loc_id']},(err,loc)=>{
+              if(err)
+               {res.send(err);}
+              else{
+                if(loc == null){
+                  res.set('Content-Type','text/plain');
+                  res.status(404).send("Could not FIND the location id delete.");
+                }
+                else{
+                  Location.remove({loc_id: req.params['loc_id']},(err,loc1)=>{
+                    if (err)
+                    {res.send(err);}
+                    else{
+                      res.status(204).send(loc1)
+                    }
+                  })
+                }
+              }
+            })
+          }
+        }
+      }
+    )
+})
+//===========================End Delete location part=====================================
+
+// Get all locations
+app.get('/locations', (req, res) => {
+  Location.find({})
+  .exec(function (err, loc) {
+      let locationList = ""
+      if (err)
+          res.send(err);
+      else
+          for (let i = 0; i < loc.length; i++) {
+              locationList += "{<br>\n" +
+                              "\"loc_id\": " + loc[i].loc_id + ",<br>\n" +
+                              "\"name\": \"" + loc[i].name + "\",<br>\n" +
+                              "\"lat\": " + loc[i].lat + "<br>\n" +
+                              "\"lon\": " + loc[i].lon + "<br>\n" +
+                              "}"
+              if (i < loc.length - 1) {
+                  locationList += ",<br>\n"
+              }
+          }
+          if (locationList.length > 0) {
+              res.send(
+                  "[<br>\n" +
+                  locationList +
+                  "<br>\n]"
+              );
+          } else {
+              res.send(
+                  "[ ]"
+              );
+          }
+  });
+});
+//===========================End Get all locations part=====================================
+
+// Get one location
+app.get('/location/:name', (req, res) => {
+  Location.findOne({ name: req.params["name"] })
+      .exec(function (err, loc) {
+          if (err)
+              res.send(err);
+          if (!loc) {
+              res.status(404)
+              res.send("Can't Find This Location")
+          }
+          else
+              res.send(
+                "{<br>\n" +
+                "\"loc_id\": " + loc.loc_id + ",<br>\n" +
+                "\"name\": \"" + loc.name + "\",<br>\n" +
+                "\"lat\": " + loc.lat + "<br>\n" +
+                "\"lon\": " + loc.lon + "<br>\n" +
+                "}"
+              );
+      })
+});
+//===========================End Get one location part=====================================
+
 app.listen(3000)
