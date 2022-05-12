@@ -124,7 +124,87 @@ app.post('/addlocation', (req, res) => {
 	)
 })
 
-//Update Location (admin only)
+//Create Location (admin side)
+app.post("/location",(req,res)=>{
+  var new_location_id;
+  Location.find().
+  sort({loc_id: -1})
+  .exec((err,e)=>{
+    if (err)
+      {res.send(err);}
+    else{
+      if(e.length == 0){
+        new_location_id = 1;
+      }
+      else{
+        new_location_id = e[0].loc_id+1;
+      }
+        Location.create({
+          loc_id: new_location_id,
+          name: req.body['name'],
+          lat: req.body['lat'],
+          lon: req.body['lon'],
+          comments: []
+        },(err,e)=>{
+          if(err)
+            {res.send(err);}
+          else{
+            Location.findOne({loc_id: new_location_id}),(err,e)=>{
+              if(err)
+                {res.send(err);}
+              else{
+                res.set("Location","http://localhost:8000/location/"+ new_location_id);
+                res.status(201).send(
+                  "loc_id:" + e.loc_id +",<br>"+
+                  '"name": "' + e.name + '",<br>'+
+                  "lat:" + e.lat + ",<br>"+
+                  "lon:" + e.lon+",<br>"+
+                  "comments: " + e.comments + "<br>"
+                );
+              }
+            }
+          }
+        })
+    }
+  })
+})
+//==========================End of the Create section =======================================================================
+//Read Location (admin side)
+app.get('/location/:loc_id',(req,res)=>{
+  Location.findOne(
+    {loc_id: req.params['loc_id']},
+  'loc_id name lat lon comments')
+  .populate('comments','comment_id content')
+  //.populate('user', 'user_id username')
+  .exec(
+    (err,e)=>{
+      if(err)
+        {res.send(err);}
+      else{
+        if(e == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The given location ID is not found.');
+        }
+        else{
+          res.send("{<br>"+
+          '"loc_id": '+e.loc_id+",<br>" +
+          '"name": "' + e.name + '",<br>' +
+          '"lat": ' + e.lat + ',<br>'+
+          '"lon": ' + e.lon + ',<br>'+
+          '"comments:<br>{<br>"comment_id": ' + e.comments.comment_id + 
+          // ',<br>' + '"user_id": ' + e.comments.user.user_id + ",<br>" +
+          // '"username": ' + e.comments.user.username + ",<br>" +
+          '<br>"content": ' + e.comments.content + "<br>}<br>}<br>" 
+          )
+        }
+      }
+    }
+  )
+  
+})
+//==========================End of the Read section =======================================================================
+
+//Update Location (admin side)
 app.put("/location/:loc_id/update",(req,res)=>{
   User.findOne(
     {user_id: req.params['user_id']},
@@ -160,8 +240,8 @@ app.put("/location/:loc_id/update",(req,res)=>{
       }
     )
 })
-// End of the update section =======================================================================
-// Delete Location (admin only)
+// ==========================End of the Update section =======================================================================
+// Delete Location (admin side)
 app.delete("/location/:loc_id/delete",(req,res)=>{
   User.findOne(
     {user_id: req.params['user_id']},
