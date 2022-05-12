@@ -18,6 +18,8 @@ db.once('open', function () {
 const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
+const cors = require('cors');
+app.use(cors());
 
 const bodyParser = require('body-parser');
 const res = require('express/lib/response');
