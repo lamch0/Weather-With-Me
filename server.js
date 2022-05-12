@@ -155,12 +155,12 @@ app.post("/location",(req,res)=>{
               else{
                 //res.set("Location","http://localhost:8000/location/"+ new_location_id);
                 res.send(
-                  "loc_id: " + loc.loc_id +",<br>"+
+                  "{<br>loc_id: " + loc.loc_id +",<br>"+
                   'name: "' + loc.name + '",<br>'+
                   "lat: " + loc.lat + ",<br>"+
-                  "lon: " + loc.lon+",<br>"+
+                  "lon: " + loc.lon+"<br>"+
                   // "comments: " + loc.comments + 
-                  "<br>"
+                  "}<br>"
                 )
               }
             })
@@ -223,9 +223,9 @@ app.put("/location/update/:loc_id",(req,res)=>{
           res.send("{<br>"+ 
             '"loc_id": '+l.loc_id+",<br>" + 
             '"name": "' + l.name + '",<br>' +
-            '"lat":'+ l.lat +'",<br>' +
-            '"loc":'+ l.lon +'"<br>' +
-            ',<br>');
+            '"lat": '+ l.lat +',<br>' +
+            '"loc": '+ l.lon +'<br>' +
+            '}<br>');
       }
     }
     })
@@ -233,43 +233,27 @@ app.put("/location/update/:loc_id",(req,res)=>{
 })
 // ==========================End of the Update section =======================================================================
 // Delete Location (admin side)
-app.delete("/location/:loc_id/delete",(req,res)=>{
-  User.findOne(
-    {user_id: req.params['user_id']},
-    'user_id username user_type')
-    .exec(
-      (err,e)=>{
-        if(err)
-          {res.send(err);}
-        else {
-          if(e.user_type != "admin"){
-            res.set('Content-Type','text/plain');
-            res.status(404).send("Only admin can delete the location.");
-          }
-          else{
-            Location.findOne({loc_id:req.body['loc_id']},(err,loc)=>{
-              if(err)
-               {res.send(err);}
-              else{
-                if(loc == null){
-                  res.set('Content-Type','text/plain');
-                  res.status(404).send("Could not FIND the location id delete.");
-                }
-                else{
-                  Location.remove({loc_id: req.params['loc_id']},(err,loc1)=>{
-                    if (err)
-                    {res.send(err);}
-                    else{
-                      res.status(204).send(loc1)
-                    }
-                  })
-                }
-              }
-            })
-          }
+app.delete("/location/delete/:loc_id",(req,res)=>{
+
+  Location.findOne({loc_id:req.params['loc_id']}).populate('comments').exec((err,loc)=>{
+    if(err)
+      {res.send(err);}
+    else{
+      if(loc == null){
+        res.set('Content-Type','text/plain');
+        res.status(404).send("Could not FIND the location id delete.");
         }
+      else{
+          Location.remove({loc_id: req.params['loc_id']},(err,loc1)=>{
+          if (err)
+            {res.send(err);}
+          else{
+              res.send('{"result": true}')
+          }
+        })
       }
-    )
+    }
+  })
 })
 //===========================End Delete location part=====================================
 
