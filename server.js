@@ -176,6 +176,7 @@ app.get('/location/:loc_id',(req,res)=>{
     {loc_id: req.params['loc_id']},
   'loc_id name lat lon comments')
   .populate('comments','comment_id content')
+  //.populate('user', 'user_id username')
   .exec(
     (err,e)=>{
       if(err)
@@ -205,40 +206,30 @@ app.get('/location/:loc_id',(req,res)=>{
 //==========================End of the Read section =======================================================================
 
 //Update Location (admin side)
-app.put("/location/:loc_id/update",(req,res)=>{
-  User.findOne(
-    {user_id: req.params['user_id']},
-    'user_id username user_type')
-    .exec(
-      (err,e)=>{
-        if(err)
-          {res.send(err);}
-        else{
-          if(e.user_type != "admin"){
-            res,set('Content-Type','text/plain');
-            res.status(404).send("Only admin can update the lcoation.");
-          }
-          else{
-            Location.findOne({loc_id: req.body['update_loc_id']},(err, l)=>{
-              if(err)
-                {res.send(err);}
-              else{
-                l.name = req.body['updatedname'];
-                l.lat = req.body['updatelat'];
-                l.lon = req.body['updatelon'];
-                l.save();
-                res.send("{<br>"+ 
-                '"loc_id": '+l.loc_Id+",<br>" + 
-                '"name": "' + l.name + '",<br>' +
-                '"lat":'+ l.lat +'",<br>' +
-                '"loc":'+ l.lon +'"<br>' +
-                ',<br>');
-              }
-            })
-          }
-        }
+app.put("/location/update/:loc_id",(req,res)=>{
+  Location.findOne({loc_id: req.params['loc_id']}).populate('comments').exec((err, l)=>{
+    if(err)
+      {res.send(err);}
+    else{
+      if(l == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The given location ID is not found.');
       }
-    )
+      else{
+        l.name = req.body['updatedname'];
+        l.lat = req.body['updatelat'];
+        l.lon = req.body['updatelon'];
+        l.save();
+          res.send("{<br>"+ 
+            '"loc_id": '+l.loc_id+",<br>" + 
+            '"name": "' + l.name + '",<br>' +
+            '"lat":'+ l.lat +'",<br>' +
+            '"loc":'+ l.lon +'"<br>' +
+            ',<br>');
+      }
+    }
+    })
+          
 })
 // ==========================End of the Update section =======================================================================
 // Delete Location (admin side)
