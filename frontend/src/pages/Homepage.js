@@ -1,14 +1,14 @@
-import React, { Component ,useState ,useEffect} from 'react'
+import React, { Component ,useState ,useEffect } from 'react'
 import './Homepage.css'
 import * as Ti from "react-icons/ti";
 import * as Ai from "react-icons/ai";
 import * as Fa from "react-icons/fa";
 import * as Bs from "react-icons/bs";
+import * as Bi from "react-icons/bi";
 import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
-import Table from 'react-bootstrap/Table';
-
+import { Table, Button } from 'react-bootstrap';
 
 
 const location_data=[  
@@ -44,6 +44,14 @@ const location_data=[
         "lat": "40.7",
         "lng": "-73.9",
         "timezone_id":"-5"
+      },{
+        "id":126,
+        "region": "North America",
+        "country": "USA",
+        "name": "New York",
+        "lat": "40.7",
+        "lng": "-73.9",
+        "timezone_id":"-5"
       }
 ]
 function Homepage() {
@@ -55,7 +63,7 @@ function Homepage() {
     <div className='banner'>
 
       <div id='icon'><Ti.TiWeatherCloudy/></div>
-      <div id='title'>Weathering with ME</div>
+      <div id='title' onClick={()=>{window.location.pathname="/"}}>Weathering with ME</div>
 
       <div className='banner-right'>
 
@@ -70,23 +78,33 @@ function Homepage() {
 
       </div>
     </div>
+    <div className='margin'></div>
+
     <div>
       <SimpleMap locations={location_data}/>
     </div>
     
     <div className="search">
       <div id="icon"><Ai.AiOutlineSearch /></div>
-      <input id="bar" type="text" placeholder="Search..." onChange={(e)=>{
-                    let SearchItemsLowerCase = e.target.value.toLowerCase();
-                    setSearchItems(SearchItemsLowerCase);}}/>
+      <input id="bar" type="text" placeholder="Search..." />
       <select name="search_field" id="search_field">
-      <option value="region">Region</option>
-      <option value="country">Country</option>
+
       <option value="name">Name</option>
       <option value="lat">Latitude</option>
       <option value="lng">Longitude</option>
-      <option value="timezone_id">Timezone</option>
+
       </select>
+      <Button id="button" onClick={(e)=>
+      {
+        let SearchItemsLowerCase = document.getElementById("bar").value.toLowerCase();
+        setSearchItems(SearchItemsLowerCase);}
+      }>Search</Button>
+      <Button id="button" onClick={(e)=>
+      {
+        document.getElementById("bar").value="";
+        let SearchItemsLowerCase = "";
+        setSearchItems(SearchItemsLowerCase);}
+      }>Reset</Button>
     </div>
     <Location_Table input={SearchItems}/>
     </>
@@ -114,7 +132,7 @@ class SimpleMap extends Component {
             {this.props.locations.map(item => {
                   return (
                     <div lat={item.lat} lng={item.lng}>
-                      <img id="pin" src={pin} alt="pin" onClick={() => { window.location.pathname = '/'+item.id; } } />
+                      <img id="pin" src={pin} alt="pin" onClick={() => { window.location.pathname = '/Singlelocation/'+item.name; } } />
                     </div>
                   );
             })}
@@ -129,19 +147,20 @@ function get_field(){
 }
 
 
+function location(item) {
+  console.log(item)
+}
+
 function Location_Table(props){
   const [location, setlocation]=useState(location_data)
-
+  const [selected_name, setselectedname]=useState("0")
+  const [selected_lat, setselectedlat]=useState("0")
+  const [selected_lng, setselectedlng]=useState("0")
+  
   
   const matchData = location.filter((items) => {
     if (props.input === '') {
         return items;
-    }
-    else if(get_field()==="region"){
-        return items.region.toLowerCase().includes(props.input);
-    }
-    else if(get_field()==="country"){
-      return items.country.toLowerCase().includes(props.input);
     }
     else if(get_field()==="name"){
       return items.name.toLowerCase().includes(props.input);
@@ -152,47 +171,84 @@ function Location_Table(props){
     else if(get_field()==="lng"){
       return items.lng.toLowerCase().includes(props.input);
     }
-    else if(get_field()==="timezone_id"){
-      return items.timezone_id.toLowerCase().includes(props.input);
-    }
+
 })
 
 
 
-  
+ 
   const [order, setorder]=useState("ASC")
   const sorting_char=(col)=>{
+    setselectedname(1);
+    setselectedlat(0);
+    setselectedlng(0);
     if (order==="ASC"){
-      const sorted=[...location].sort((a,b)=>
-      a[col].toLowerCase()>b[col].toLowerCase()? 1:-1
-      );
+      const sorted=[...location].sort((a,b)=>a[col].toLowerCase()>b[col].toLowerCase()? 1:-1);
       setlocation(sorted);
       setorder("DSC");
     }
     if (order==="DSC"){
-      const sorted=[...location].sort((a,b)=>
-      a[col].toLowerCase()<b[col].toLowerCase()? 1:-1
-      );
+      const sorted=[...location].sort((a,b)=>a[col].toLowerCase()<b[col].toLowerCase()? 1:-1);
       setlocation(sorted);
       setorder("ASC");
     }
   }
   const sorting_int=(col)=>{
+    setselectedname(0);
+    if(col=="lat"){
+      setselectedlat(1);
+      setselectedlng(0);
+    }
+    if(col=="lng"){
+      setselectedlat(0);
+      setselectedlng(1);
+    }
     if (order==="ASC"){
-      const sorted=[...location].sort((a,b)=>
-      a[col]>b[col]? 1:-1
-      );
+      const sorted=[...location].sort((a,b)=>a[col]-b[col]);
       setlocation(sorted);
       setorder("DSC");
     }
     if (order==="DSC"){
-      const sorted=[...location].sort((a,b)=>
-      a[col]<b[col]? 1:-1
-      );
+      const sorted=[...location].sort((a,b)=>b[col]-a[col]);
       setlocation(sorted);
       setorder("ASC");
     }
   }
+
+    function Sort_icon(){
+      if (selected_name===1){
+          if (order=="ASC"){
+            return(<Bi.BiSortZA/>)
+          }else{
+            return(<Bi.BiSortAZ/>)
+          }
+      }else{
+        return ("")
+      }
+    }
+    function Sort_icon1(){
+      if (selected_lat===1){
+          if (order=="ASC"){
+            return(<Bs.BsSortNumericUp/>)
+          }else{
+            return(<Bs.BsSortNumericDown/>)
+          }
+      }else{
+        return ("")
+      }
+    }
+    function Sort_icon2(){
+      if (selected_lng===1){
+          if (order=="ASC"){
+            return(<Bs.BsSortNumericUp/>)
+          }else{
+            return(<Bs.BsSortNumericDown/>)
+          }
+      }else{
+        return ("")
+      }
+    }
+
     return(
     <>
     
@@ -200,28 +256,26 @@ function Location_Table(props){
       <Table striped bordered hover>
       <thead>
           <tr>
-            <th id="table_title" onClick={()=>sorting_char("region")}>region</th>
-            <th id="table_title" onClick={()=>sorting_char("country")}>Country</th>
-            <th id="table_title" onClick={()=>sorting_char("name")}>name</th>
-            <th id="table_title" onClick={()=>sorting_int("lat")}>Latitude</th>
-            <th id="table_title" onClick={()=>sorting_int("lng")}>Longitude</th>
-            <th id="table_title" onClick={()=>sorting_int("timezone_id")}>timezone</th>
-            <th id="table_title">Weather Information</th>
-            <th id="table_title">Add to Favourite</th>
+
+            <th id="table_title" onClick={()=>sorting_char("name")}>name &nbsp;{Sort_icon()}</th>
+            <th id="table_title" onClick={()=>sorting_int("lat")}>Latitude &nbsp;{Sort_icon1()}</th>
+            <th id="table_title" onClick={()=>sorting_int("lng")}>Longitude &nbsp;{Sort_icon2()}</th>
+
+            <th id="table_title1" style={{width:"5vw"}}>Weather Information</th>
+            <th id="table_title1" style={{width:"5vw"}}>Add to Favourite</th>
           </tr>
         </thead>
         {matchData.map((item) => {
       return(
         <tbody>
             <tr>
-              <td>{item.region}</td>
-              <td>{item.country}</td>
+
               <td>{item.name}</td>
               <td>{item.lat}</td>
               <td>{item.lng}</td>
-              <td>{item.timezone_id}</td>
-              <td>button</td>
-              <td>button</td>
+
+              <td><Button href={'./Singlelocation/' + item.name}>View Details</Button></td>
+              <td><Button onClick={()=>console.log(item)}>Location</Button></td>
             </tr>
           </tbody>
           );
