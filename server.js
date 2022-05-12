@@ -8,20 +8,7 @@ const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
-const { default: mongoose } = require('mongoose');
-mongoose.connect('mongodb+srv://stu142:p215347-@csci2720.m2qbq.mongodb.net/stu142');
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Connection error:'));
-//Upon opening the database successuflly
-db.once('open', function () {
-    console.log("Connection is open...")});
-const Location = require("./models/location_model");
-const User = require('./models/user_model')
-const Comment = require('./models/comment_model')
 
-const bodyParser = require('body-parser');
-const res = require('express/lib/response');
-app.use(bodyParser.urlencoded({extended: true}));
 const initializePassport = require('./utils/passport-config')
 initializePassport(
   passport,
@@ -97,31 +84,5 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
-
-
-app.post('/addlocation', (req, res) => {
-	var newLocation = req.query
-	console.log(newLocation)
-	Location.find(
-		(err, locations) => {
-			var maxId = Math.max(...locations.map(e => e.loc_id), 0)+1
-			// console.log(maxId)
-			Location.create({
-				loc_id: maxId,
-				name: newLocation.name,
-				lat: newLocation.lat,
-				lon: newLocation.lon,
-				comments: []
-			}, (err, location) => {
-				if (err)
-					return handleError(err);
-				else 
-					console.log(location)
-					res.send(location)
-				
-			})
-		}
-	)
-})
 
 app.listen(3000)
