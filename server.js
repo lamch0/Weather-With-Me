@@ -94,6 +94,12 @@ app.post("/location",(req,res)=>{
     if (err)
       {res.send(err)}
     else{
+      if(req.body['name'] == null || req.body['name'] == "")
+      {
+        res.set('Content-Type','text/plain');
+        res.status(404).send('The name field does not provide.');
+      }
+      else{
       if(e.length == 0){
         new_location_id = 1;
       }
@@ -127,10 +133,11 @@ app.post("/location",(req,res)=>{
             })
           }
         })
+      }  
     }
   })
 })
-//==========================End of the Create section =======================================================================
+//==========================End of the Create Location section =======================================================================
 //Read Location (admin side)
 app.get('/location/:loc_id',(req,res)=>{
   Location.findOne(
@@ -152,11 +159,12 @@ app.get('/location/:loc_id',(req,res)=>{
           '"loc_id": '+e.loc_id+",<br>" +
           '"name": "' + e.name + '",<br>' +
           '"lat": ' + e.lat + ',<br>'+
-          '"lon": ' + e.lon + ',<br>'+
-          '"comments:<br>{<br>"comment_id": ' + e.comments.comment_id + 
+          '"lon": ' + e.lon + '<br>'+
+          // '"comments":<br>{<br>"comment_id": ' + e.comments.comment_id + 
           // ',<br>' + '"user_id": ' + e.comments.user.user_id + ",<br>" +
           // '"username": ' + e.comments.user.username + ",<br>" +
-          '<br>"content": ' + e.comments.content + "<br>}<br>}<br>" 
+          // '<br>"content": ' + e.comments.content + "<br>}<br>}<br>"
+          "}<br>" 
           )
         }
       }
@@ -164,7 +172,7 @@ app.get('/location/:loc_id',(req,res)=>{
   )
   
 })
-//==========================End of the Read section =======================================================================
+//==========================End of the Read Location section =======================================================================
 
 //Update Location (admin side)
 app.put("/location/update/:loc_id",(req,res)=>{
@@ -177,6 +185,11 @@ app.put("/location/update/:loc_id",(req,res)=>{
           res.status(404).send('The given location ID is not found.');
       }
       else{
+        if (req.body['updatedname'] == "" || req.body['updatedname'] == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The name field does not provide.');
+        }
+        else{
         l.name = req.body['updatedname'];
         l.lat = req.body['updatelat'];
         l.lon = req.body['updatelon'];
@@ -187,12 +200,13 @@ app.put("/location/update/:loc_id",(req,res)=>{
             '"lat": '+ l.lat +',<br>' +
             '"loc": '+ l.lon +'<br>' +
             '}<br>');
+        }
       }
     }
     })
           
 })
-// ==========================End of the Update section =======================================================================
+// ==========================End of the Update Location section =======================================================================
 // Delete Location (admin side)
 app.delete("/location/delete/:loc_id",(req,res)=>{
 
@@ -216,7 +230,7 @@ app.delete("/location/delete/:loc_id",(req,res)=>{
     }
   })
 })
-//===========================End Delete location part=====================================
+//===========================End of the Delete location section=====================================
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
