@@ -7,11 +7,8 @@ var Schema = mongoose.Schema;
 const LocationSchema = new mongoose.Schema({
     loc_id: {type: Number, require: true, unique: true},
     name: {type: String, require: true},
-    region: {type: String},
-    country: {type: String},
-    latitude: {type: Number},
-    longitude: {type: Number},
-    timezone_id: {type: String},
+    lat: {type: Number},
+    lon: {type: Number},
     comments: [{type: Schema.Types.ObjectId, ref: 'comment'}]
 })
 

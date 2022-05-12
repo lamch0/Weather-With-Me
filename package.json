@@ -12,6 +12,7 @@
     "mongoose": "^6.3.2",
     "node": "^17.7.2",
     "nodemon": "^2.0.16",
+    "notenv": "^2.0.3",
     "npm": "^8.9.0",
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
