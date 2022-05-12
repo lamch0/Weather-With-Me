@@ -15,22 +15,41 @@ db.on('error', console.error.bind(console, 'Connection error:'));
 //Upon opening the database successuflly
 db.once('open', function () {
     console.log("Connection is open...")});
+
+// aquire database schema models
 const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
 
+const dotenv = require('dotenv')
+dotenv.config({path: './.env'})
 const bodyParser = require('body-parser');
 const res = require('express/lib/response');
 app.use(bodyParser.urlencoded({extended: true}));
+
+// creating passport for login 
 const initializePassport = require('./utils/passport-config')
 initializePassport(
   passport,
 //   email => users.find(user => user.email === email),
-  username => users.find(user => user.username === username),
-  id => users.find(user => user.id === id)
+  // username => users.find(user => user.username === username),
+  // id => users.find(user => user.id === id),
+
+  async (username) => {
+    const userFound = await User.findOne({username: username});
+    return userFound;
+  },
+  async (id) => {
+    const userFound = await User.findOne({user_id: id});
+    return userFound;
+  } 
 )
 
-const users = []
+app.get('/user/:username', async (req, res) => {
+  const user = await User.findOne({username: req.params.username})
+  res.send(user)
+})
+// const users = []
 
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
@@ -63,22 +82,36 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
 })
 
+
+
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    users.push({
-      id: Date.now().toString(),
+    const newUser = new User({
+      user_id: Date.now().toString(),
       username: req.body.username,
-    //   email: req.body.email,
-      password: hashedPassword
+      password: hashedPassword,
+      fav_loc: []
     })
+    await newUser.save()
+    
+    // users.push({
+    //   id: Date.now().toString(),
+    //   username: req.body.username,
+    // //   email: req.body.email,
+    //   password: hashedPassword
+    // })
     res.redirect('/login')
   } catch {
+    console.log(error)
     res.redirect('/register')
   }
 })
 
 app.delete('/logout', (req, res) => {
+  req.session.destroy(() => {
+    console.log('session destroyed')
+  })
   req.logOut()
   res.redirect('/login')
 })
