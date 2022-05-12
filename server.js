@@ -98,7 +98,7 @@ function checkNotAuthenticated(req, res, next) {
   next()
 }
 
-
+// add new location to the database
 app.post('/addlocation', (req, res) => {
 	var newLocation = req.query
 	console.log(newLocation)
