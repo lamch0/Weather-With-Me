@@ -85,7 +85,7 @@ app.delete('/logout', (req, res) => {
   res.redirect('/login')
 })
 // Create Comment (user side)
-app.post("/comments/:loc_id",(req,res)=> {
+app.post("/comments/:name",(req,res)=> {
   var new_comment_id;
   Comment.find().
   sort({comment_id: -1})
@@ -114,7 +114,6 @@ app.post("/comments/:loc_id",(req,res)=> {
               res.send("Can not create a new comment because the user_id is invalid.");
             }
             else{
-              console.log(user)
               Comment.create({
                 comment_id: new_comment_id,
                 user_id: user.user_id,
@@ -129,7 +128,7 @@ app.post("/comments/:loc_id",(req,res)=> {
                     if(err)
                     {res.send(err)}
                     else{
-                      Location.findOne({loc_id: req.params['loc_id']}).exec(async(err,loc)=>{
+                      Location.findOne({name: req.params['name']}).exec(async(err,loc)=>{
                           if(err)
                             {res.send(err)}
                           else{
