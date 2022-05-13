@@ -3,8 +3,8 @@ var Schema = mongoose.Schema;
 // const location = require('./location_model');
 
 const CommentSchema = new mongoose.Schema({
-    comment_id: {type: Number},
-    user_id: {type: Number},
+    comment_id: {type: Number,require: true, unique: true},
+    user_id: {type: Number,require: true},
     content: {type: String}
 })
 
