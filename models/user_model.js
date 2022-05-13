@@ -6,7 +6,7 @@ var Schema = mongoose.Schema;
 
 const UserSchema = new mongoose.Schema({
     user_id: {type: Number, require: true, unique: true},
-    username: {type: String, require: true},
+    username: {type: String, require: true, unique: true},
     password: {type: String, require: true},
     user_type: {type: String, default: 'user'},
     fav_loc: [{type: Number}]
