@@ -2,7 +2,9 @@ if(process.env.NODE_ENV !== 'production'){
 	require('dotenv').config()
   }
 const express = require('express')
+
 const app = express()
+app.use(express.static('./views'))
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const flash = require('express-flash')
@@ -47,7 +49,7 @@ initializePassport(
   } 
 )
 
-app.get('/user/:username', async (req, res) => {
+app.get('api/user/:username', async (req, res) => {
   const user = await User.findOne({username: req.params.username})
   res.send(user)
 })
@@ -121,7 +123,7 @@ app.delete('/logout', (req, res) => {
 })
 
 //Create Location (admin side)
-app.post("/location",(req,res)=>{
+app.post("/api/location",(req,res)=>{
   var new_location_id;
   Location.find().
   sort({loc_id: -1})
@@ -174,7 +176,7 @@ app.post("/location",(req,res)=>{
 })
 //==========================End of the Create Location section =======================================================================
 //Read Location by loc_id (admin side)
-app.get('/location/:loc_id',(req,res)=>{
+app.get('/api/location/:loc_id',(req,res)=>{
   Location.findOne(
     {loc_id: req.params['loc_id']},
   'loc_id name lat lon comments')
@@ -209,7 +211,7 @@ app.get('/location/:loc_id',(req,res)=>{
 //==========================End of the Read Location section =======================================================================
 
 //Update Location (admin side)
-app.put("/location/update/:loc_id",(req,res)=>{
+app.put("/api/location/update/:loc_id",(req,res)=>{
   Location.findOne({loc_id: req.params['loc_id']}).populate('comments').exec((err, l)=>{
     if(err)
       {res.send(err);}
@@ -242,7 +244,7 @@ app.put("/location/update/:loc_id",(req,res)=>{
 })
 // ==========================End of the Update Location section =======================================================================
 // Delete Location (admin side)
-app.delete("/location/delete/:loc_id",(req,res)=>{
+app.delete("/api/location/delete/:loc_id",(req,res)=>{
 
   Location.findOne({loc_id:req.params['loc_id']}).populate('comments').exec((err,loc)=>{
     if(err)
@@ -318,7 +320,7 @@ function checkAdmin(req, res, next ) {
 // })
 
 // Get all locations in JSON
-app.get('/locations', (req, res) => {
+app.get('/api/locations', (req, res) => {
   Location.find({})
   .exec(function (err, loc) {
     if (err)
@@ -332,7 +334,7 @@ app.get('/locations', (req, res) => {
 //===========================Start user part=====================================
 
 // Create user (admin side)
-app.post("/user", async(req,res) => {
+app.post("/api/user", async(req,res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
     const newUser = new User({
       user_id: Date.now().toString(),
@@ -345,7 +347,7 @@ app.post("/user", async(req,res) => {
 })
 
 // Read user (admin side)
-app.get("/user/:user_id", (req, res) => {
+app.get("/api/user/:user_id", (req, res) => {
   User.findOne(
     {user_id: req.params['user_id']},
     'username password'
@@ -366,7 +368,7 @@ app.get("/user/:user_id", (req, res) => {
 })
 
 // Update user (admin side)
-app.put("/user/update/:user_id", async(req, res) => {
+app.put("/api/user/update/:user_id", async(req, res) => {
   const hashedPassword = await bcrypt.hash(req.body['updatedpassword'], 10)
   User.findOne({user_id: req.params['user_id']})
   .exec(
@@ -398,7 +400,7 @@ app.put("/user/update/:user_id", async(req, res) => {
 })
 
 // Delete user (admin side)
-app.delete("/user/delete/:user_id", (req, res) => {
+app.delete("/api/user/delete/:user_id", (req, res) => {
   User.findOne({user_id: req.params['user_id']})
   .exec((err, e)=> {
     if (err)
@@ -424,7 +426,7 @@ app.delete("/user/delete/:user_id", (req, res) => {
 
 
 // Get one location by name in JSON eg'/location/name?name=Tokyo'
-app.get('/location/get/name?', (req, res) => {
+app.get('/api/location/get/name?', (req, res) => {
   console.log("getting location by name")
   Location.findOne(
     { name: req.query["name"] }, (err, loc) => {
@@ -441,7 +443,7 @@ app.get('/location/get/name?', (req, res) => {
 });
 
 // Get one location by loc_id in JSON eg'/location/id?id=1'
-app.get('/location/get/id?', (req, res) => {
+app.get('/api/location/get/id?', (req, res) => {
   // console.log(req.query["id"])
   Location.findOne(
     { loc_id: req.query["id"] }, (err, loc) => {
@@ -459,7 +461,7 @@ app.get('/location/get/id?', (req, res) => {
 //===========================End Get one location part=====================================
 
 // Add location to fav_loc list of user, eg '/favourite/ryan/10'
-app.put('/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
+app.put('/api/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
   // User.find({ username: req.session.passport.user }, (err, user) => {
   // console.log(req.params)
   User.findOne({ username: req.params.username }, async (err, user) => {
@@ -480,7 +482,7 @@ app.put('/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
 })
 
 // Get list of fav_loc of one user
-app.get('/favourite', (req, res)=> {
+app.get('/api/favourite', (req, res)=> {
   User.findOne({username: req.session.passport.user}, (err, e)=> {
     if (err)
       res.send(err)
@@ -491,11 +493,13 @@ app.get('/favourite', (req, res)=> {
 })
 
 // Delete loc from fav_loc 
-app.delete()
 
 // get user object if logged in
-app.get('/userloggedin', (req, res) => {
-  if (req.isAuthenticated){
+app.get('/api/userloggedin', (req, res) => {
+  console.log(req.session);
+  console.log(req.session.passport);
+  if (req.session.passport != undefined){
+    console.log("user is auth.")
     User.findOne({username: req.session.passport.user}, (err, user) => {
     if (err)
       res.send(err)
@@ -520,4 +524,3 @@ app.get('/userloggedin', (req, res) => {
 // })
 
 app.listen(8000)
-
