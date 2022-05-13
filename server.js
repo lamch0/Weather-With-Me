@@ -71,12 +71,14 @@ app.use(methodOverride('_method'))
 
 // when logged in, check user type
 app.get('/', checkAuthenticated, (req, res) => {
-  console.log('logged in to ' + req.session.passport.user)
+  if (req.session.passport.user){
+    console.log('logged in to ' + req.session.passport.user)
+  }
   if (user == 'admin'){
-    res.send("admin").render('profile.ejs', { username: "Admin account" })
+    res.send("admin")//.render('profile.ejs', { username: "Admin account" })
   }
   else {
-    res.send("user").render('profile.ejs', { username: req.session.passport.user })
+    res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
   }
   // res.render('profile.ejs', { username: req.session.passport.user })
 })
