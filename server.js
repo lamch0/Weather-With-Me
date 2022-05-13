@@ -277,7 +277,7 @@ app.get('/locations', (req, res) => {
 });
 //===========================End Get all locations part=====================================
 
-// Get one location by name
+// Get one location by name eg'/location/name?name=Tokyo'
 app.get('/location/name?', (req, res) => {
   Location.findOne(
     { name: req.query["name"] }, (err, loc) => {
@@ -301,7 +301,7 @@ app.get('/location/name?', (req, res) => {
   )
 });
 
-// Get one location by loc_id
+// Get one location by loc_id  eg'/location/id?id=1'
 app.get('/location/id?', (req, res) => {
   // console.log(req.query["id"])
   Location.findOne(
@@ -319,5 +319,5 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-app.listen(3000)
+app.listen(8000)
 

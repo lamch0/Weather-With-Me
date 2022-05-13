@@ -7,8 +7,8 @@ var Schema = mongoose.Schema;
 const LocationSchema = new mongoose.Schema({
     loc_id: {type: Number, require: true, unique: true},
     name: {type: String, require: true},
-    lat: {type: Number},
-    lon: {type: Number},
+    lat: {type: Number, require: true},
+    lon: {type: Number, require: true},
     comments: [{type: Schema.Types.ObjectId, ref: 'comment'}]
 })
 
