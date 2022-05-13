@@ -449,9 +449,14 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-// Get favourite list 
-app.get('/favourite/:user_id', (req, res)=> {
-  User.findOne({user_id: req.params.user})
+// Add location to fav_loc list of user
+app.put('/favourite/:loc_id', (req, res) => {
+  
 })
+
+// Get list of fav_loc of one user
+
+// Delete loc from fav_loc 
+
 app.listen(8000)
 
