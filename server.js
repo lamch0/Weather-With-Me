@@ -459,7 +459,7 @@ app.get('/location/get/id?', (req, res) => {
 //===========================End Get one location part=====================================
 
 // Add location to fav_loc list of user, eg '/favourite/ryan/10'
-app.put('/favourite/:username/:loc_id', (req, res) => {
+app.put('/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
   // User.find({ username: req.session.passport.user }, (err, user) => {
   // console.log(req.params)
   User.findOne({ username: req.params.username }, async (err, user) => {
@@ -480,7 +480,7 @@ app.put('/favourite/:username/:loc_id', (req, res) => {
 })
 
 // Get list of fav_loc of one user
-app.get('/favourite/', (req, res)=> {
+app.get('/favourite', (req, res)=> {
   User.findOne({username: req.session.passport.user}, (err, e)=> {
     if (err)
       res.send(err)
@@ -491,6 +491,28 @@ app.get('/favourite/', (req, res)=> {
 })
 
 // Delete loc from fav_loc 
+
+// get user object if logged in
+app.get('/userloggedin', checkAuthenticated, (req, res) => {
+  User.findOne({username: req.session.passport.user}, (err, user) => {
+    if (err)
+      res.send(err)
+    else {
+      res.send(user)
+    }
+  })
+})
+// app.get('/userloggedin/:usename',  (req, res) => {
+//   console.log(req.params.username)
+//   User.findOne({usename: req.params.username},  (err, user) => {
+//     if (err)
+//       res.send(err)
+//     else {
+//       // console.log(user)
+//       res.send(user)
+//     }
+//   })
+// })
 
 app.listen(8000)
 
