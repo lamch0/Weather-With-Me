@@ -449,9 +449,25 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-// Add location to fav_loc list of user
-app.put('/favourite/:loc_id', (req, res) => {
-  
+// Add location to fav_loc list of user, eg '/favourite/ryan/10'
+app.put('/favourite/:username/:loc_id', (req, res) => {
+  // User.find({ username: req.session.passport.user }, (err, user) => {
+  // console.log(req.params)
+  User.findOne({ username: req.params.username }, async (err, user) => {
+    if (err)
+      res.send('Error: cannot find user')
+    else if (!user)
+      res.send('No such user')
+    else {
+      console.log(user)
+      if (!user.fav_loc.includes(req.params.loc_id)){
+        user.fav_loc.push(req.params.loc_id)
+        await user.save()
+      }
+      // console.log(user)
+      res.send(user)
+    }
+  })
 })
 
 // Get list of fav_loc of one user
