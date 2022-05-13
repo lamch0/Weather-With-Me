@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
     username: {type: String, require: true},
     password: {type: String, require: true},
     user_type: {type: String, default: 'user'},
-    fav_loc: [{type: Schema.Types.ObjectId, ref: 'location'}]
+    fav_loc: [{type: Number}]
 })
 
 module.exports = mongoose.model('user', UserSchema);
