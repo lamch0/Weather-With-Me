@@ -18,6 +18,8 @@ db.once('open', function () {
 const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
+const cors = require('cors');
+app.use(cors());
 
 const bodyParser = require('body-parser');
 const res = require('express/lib/response');
@@ -82,6 +84,153 @@ app.delete('/logout', (req, res) => {
   req.logOut()
   res.redirect('/login')
 })
+
+//Create Location (admin side)
+app.post("/location",(req,res)=>{
+  var new_location_id;
+  Location.find().
+  sort({loc_id: -1})
+  .exec((err,e)=>{
+    if (err)
+      {res.send(err)}
+    else{
+      if(req.body['name'] == null || req.body['name'] == "")
+      {
+        res.set('Content-Type','text/plain');
+        res.status(404).send('The name field does not provide.');
+      }
+      else{
+      if(e.length == 0){
+        new_location_id = 1;
+      }
+      else{
+        new_location_id = e[0].loc_id+1;
+      }
+        Location.create({
+          loc_id: new_location_id,
+          name: req.body['name'],
+          lat: req.body['lat'],
+          lon: req.body['lon'],
+          comments: []
+        },(err,e)=>{
+          if(err)
+            return handleError(err)
+          else{
+            Location.findOne({loc_id: new_location_id}).populate('comments').exec((err,loc)=>{
+              if(err)
+                {res.send(err)}
+              else{
+                //res.set("Location","http://localhost:8000/location/"+ new_location_id);
+                res.send(
+                  "{<br>loc_id: " + loc.loc_id +",<br>"+
+                  'name: "' + loc.name + '",<br>'+
+                  "lat: " + loc.lat + ",<br>"+
+                  "lon: " + loc.lon+"<br>"+
+                  // "comments: " + loc.comments + 
+                  "}<br>"
+                )
+              }
+            })
+          }
+        })
+      }  
+    }
+  })
+})
+//==========================End of the Create Location section =======================================================================
+//Read Location (admin side)
+app.get('/location/:loc_id',(req,res)=>{
+  Location.findOne(
+    {loc_id: req.params['loc_id']},
+  'loc_id name lat lon comments')
+  .populate('comments','comment_id content')
+  //.populate('user', 'user_id username')
+  .exec(
+    (err,e)=>{
+      if(err)
+        {res.send(err);}
+      else{
+        if(e == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The given location ID is not found.');
+        }
+        else{
+          res.send("{<br>"+
+          '"loc_id": '+e.loc_id+",<br>" +
+          '"name": "' + e.name + '",<br>' +
+          '"lat": ' + e.lat + ',<br>'+
+          '"lon": ' + e.lon + '<br>'+
+          // '"comments":<br>{<br>"comment_id": ' + e.comments.comment_id + 
+          // ',<br>' + '"user_id": ' + e.comments.user.user_id + ",<br>" +
+          // '"username": ' + e.comments.user.username + ",<br>" +
+          // '<br>"content": ' + e.comments.content + "<br>}<br>}<br>"
+          "}<br>" 
+          )
+        }
+      }
+    }
+  )
+  
+})
+//==========================End of the Read Location section =======================================================================
+
+//Update Location (admin side)
+app.put("/location/update/:loc_id",(req,res)=>{
+  Location.findOne({loc_id: req.params['loc_id']}).populate('comments').exec((err, l)=>{
+    if(err)
+      {res.send(err);}
+    else{
+      if(l == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The given location ID is not found.');
+      }
+      else{
+        if (req.body['updatedname'] == "" || req.body['updatedname'] == null){
+          res.set('Content-Type','text/plain');
+          res.status(404).send('The name field does not provide.');
+        }
+        else{
+        l.name = req.body['updatedname'];
+        l.lat = req.body['updatelat'];
+        l.lon = req.body['updatelon'];
+        l.save();
+          res.send("{<br>"+ 
+            '"loc_id": '+l.loc_id+",<br>" + 
+            '"name": "' + l.name + '",<br>' +
+            '"lat": '+ l.lat +',<br>' +
+            '"loc": '+ l.lon +'<br>' +
+            '}<br>');
+        }
+      }
+    }
+    })
+          
+})
+// ==========================End of the Update Location section =======================================================================
+// Delete Location (admin side)
+app.delete("/location/delete/:loc_id",(req,res)=>{
+
+  Location.findOne({loc_id:req.params['loc_id']}).populate('comments').exec((err,loc)=>{
+    if(err)
+      {res.send(err);}
+    else{
+      if(loc == null){
+        res.set('Content-Type','text/plain');
+        res.status(404).send("Could not FIND the location id delete.");
+        }
+      else{
+          Location.remove({loc_id: req.params['loc_id']},(err,loc1)=>{
+          if (err)
+            {res.send(err);}
+          else{
+              res.send('{"result": true}')
+          }
+        })
+      }
+    }
+  })
+})
+//===========================End of the Delete location section=====================================
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
