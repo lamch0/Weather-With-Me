@@ -8,8 +8,10 @@ import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
 import { Table, Button } from 'react-bootstrap';
+import axios from "axios";
+// import { init } from '../../../models/location_model';
 
-const location_data=
+let location_data =
 {
         "id":123,
         "region": "Asia",
@@ -21,7 +23,24 @@ const location_data=
         "comments":[{"user": "user1", "content": "hi"}, {"user": "user2", "content": "hi"}]
 }
 
+let loc = window.location.href.replace("http://localhost:3000/Singlelocation/", "").replace("%20", " ");
+
+let url = "http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + loc + "&aqi=no";
+
+
+
 function Locationpage() {
+
+  const [weather, setWeather] = useState([{}]);
+
+    useEffect(() => {
+        axios.get(url).then((response) => {
+        setWeather(response.data);
+        });
+        }, []);
+  
+  try{
+    console.log(weather.location.name)
   return (
     <>
     <div className='banner'>
@@ -44,37 +63,37 @@ function Locationpage() {
     </div>
     <div className='margin'></div>
     <div className='container'>
-      <h1 className='text-center'>{location_data.name}</h1>
+      <h1 className='text-center'>{loc}</h1>
 
-      <SimpleMap location={location_data}/>
+      <SimpleMap location={weather}/>
       <hr></hr>
-      <LocationInfo location={location_data}></LocationInfo>
+      <LocationInfo location={weather}></LocationInfo>
       <hr></hr>
       <CommentArea comments={location_data.comments}></CommentArea>
     </div>
     </>
   )
+  }catch(e){
+    return("Error occur")
+  }
 }
 
 class SimpleMap extends Component {
-  static defaultProps = {
-    zoom: 10
-  };
-
   render() {
     return (
       <>
         <div id="map" style={{width:"40vw"}}>
           <GoogleMapReact
             bootstrapURLKeys={{ key: 'AIzaSyDNzUJieo8rD3mAG5ZgZD7dZPEMUeMUuSI' }}
-            defaultCenter={{lat: this.props.location.lat, lng: this.props.location.lng}}
-            defaultZoom={this.props.zoom}
+            defaultCenter={{lat: this.props.location.location.lat, lng: this.props.location.location.lon}}
+            defaultZoom={1}
           >
-            <div lat={this.props.location.lat} lng={this.props.location.lng}>
-              <img id="pin" src={pin} alt="pin" onClick={() => { window.location.pathname = '/'+this.props.location.id; } } />
+            <div lat={this.props.location.location.lat} lng={this.props.location.location.lon}>
+              <img id="pin" src={pin} alt="pin"/>
             </div>
           </GoogleMapReact>
-        </div></>
+        </div>
+      </>
     );
   }
 }
@@ -97,12 +116,12 @@ class LocationInfo extends Component {
             </thead>
             <tbody>
                 <tr>
-                  <td>{this.props.location.region}</td>
-                  <td>{this.props.location.country}</td>
-                  <td>{this.props.location.name}</td>
-                  <td>{this.props.location.lat}</td>
-                  <td>{this.props.location.lng}</td>
-                  <td>{this.props.location.timezone_id}</td>
+                  <td>{this.props.location.location.region}</td>
+                  <td>{this.props.location.location.country}</td>
+                  <td>{this.props.location.location.name}</td>
+                  <td>{this.props.location.location.lat}</td>
+                  <td>{this.props.location.location.lon}</td>
+                  <td>{this.props.location.location.tz_id}</td>
                 </tr>
               </tbody>
         </Table>
@@ -115,6 +134,7 @@ class CommentArea extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: "",
       comment: ""
     };
   }
