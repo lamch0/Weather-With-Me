@@ -70,7 +70,32 @@ function Update(){
 function UserUpdate(){
 
     function createUser(){
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let bodytext = "username=" + username + "&password=" + password;
+
+        if(username == ""){
+            document.querySelector("#username").classList.add("isinvalid");
+        }
+        if(password == ""){
+            document.querySelector("#password").classList.add("isinvalid");
+        }
+        if(username == "" || password == ""){
+            alert("username or password cannot be blank.")
+            return;
+        }
+
+        fetch("http://localhost:8000/user", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            body: bodytext
+        })
+        .then((res) => {
+            console.log(res);
+        })
     }
 
     function retrieveUser(){
@@ -110,10 +135,10 @@ function UserUpdate(){
                         <input type="text" name="password" id="password" placeholder="password"/>
                     </div>
                 </form>
-                <button className="btn btn-primary" onClick={createUser()}>Create</button>
-                <button className="btn btn-primary" onClick={retrieveUser()}>Retreive</button>
-                <button className="btn btn-primary" onClick={updateUser()}>Update</button>
-                <button className="btn btn-primary" onClick={deleteUser()}>Delete</button>
+                <button className="btn btn-primary" onClick={() => createUser()}>Create</button>
+                <button className="btn btn-primary" onClick={() => retrieveUser()}>Retreive</button>
+                <button className="btn btn-primary" onClick={() => updateUser()}>Update</button>
+                <button className="btn btn-primary" onClick={() => deleteUser()}>Delete</button>
             </div>
         </div>
     )

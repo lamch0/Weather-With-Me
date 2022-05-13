@@ -21,7 +21,7 @@ const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
 const cors = require('cors');
-app.use(cors());
+app.use(cors({origin:"http://localhost:3000", credentials:true}));
 
 const dotenv = require('dotenv')
 dotenv.config({path: './.env'})
@@ -205,7 +205,6 @@ app.get('/location/:loc_id',(req,res)=>{
       }
     }
   )
-  
 })
 //==========================End of the Read Location section =======================================================================
 
@@ -281,6 +280,15 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
+
+function checkAdmin(req, res, next ) {
+  User.findOne({username: req.session.passport.user}, (err, e)=> {
+    if (err)
+      return err
+    else if (e.user_type == "admin")
+      next()
+  })
+}
 // End of account management (login logout register) section ===========================================
 
 // // add new location to the database (for initial hardcoding)
@@ -321,8 +329,103 @@ app.get('/locations', (req, res) => {
 });
 //===========================End Get all locations part=====================================
 
+//===========================Start user part=====================================
+
+// Create user (admin side)
+app.post("/user", async(req,res) => {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    const newUser = new User({
+      user_id: Date.now().toString(),
+      username: req.body.username,
+      password: hashedPassword,
+      fav_loc: []
+    })
+    await newUser.save()
+    res.send(newUser)
+})
+
+// Read user (admin side)
+app.get("/user/:user_id", (req, res) => {
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'username password'
+  ).exec(
+    (err, e)=>{
+      if (err)
+        res.send(err)
+      else {
+        if (e == null) {
+          res.set('Content-Type', 'text/plain')
+          res.status(404).send('The given user ID is not found.')
+        } else {
+          res.json(e)
+        }
+      }
+    }
+  )
+})
+
+// Update user (admin side)
+app.put("/user/update/:user_id", async(req, res) => {
+  const hashedPassword = await bcrypt.hash(req.body['updatedpassword'], 10)
+  User.findOne({user_id: req.params['user_id']})
+  .exec(
+    (err, e) => {
+      if (err)
+        res.send(err)
+      else {
+        if (e == null ) {
+          res.set('Content-Type', 'text/plain')
+          res.status(404).send('The given user ID is not found')
+        } else {
+          if (req.body['updatedname'] == "" || req.body['updatedname'] == null){
+            res.set('Content-Type','text/plain');
+            res.status(404).send('The username field does not provide.');
+          } else if (req.body['updatedpassword'] == "" || req.body['updatedpassword'] == null){
+            res.set('Content-Type','text/plain');
+            res.status(404).send('The password field does not provide.');
+          }
+          else {
+            e.username = req.body['updatedname']
+            e.password = hashedPassword
+            e.save()
+            res.json(e)
+          }
+        }
+      }
+    }
+  )
+})
+
+// Delete user (admin side)
+app.delete("/user/delete/:user_id", (req, res) => {
+  User.findOne({user_id: req.params['user_id']})
+  .exec((err, e)=> {
+    if (err)
+      res,send(err)
+    else {
+      if (e == null) {
+        res.set('Content-Type','text/plain');
+        res.status(404).send("Could not FIND the user id delete.");
+      } else {
+        User.remove({user_id: req.params['user_id']}, (err, del)=> {
+          if (err)
+            res.send(err)
+          else 
+            res.send('{"result": true}')
+        })
+      }
+    }
+  })
+})
+//===========================End user part=====================================
+
+
+
+
 // Get one location by name in JSON eg'/location/name?name=Tokyo'
-app.get('/location/name?', (req, res) => {
+app.get('/location/get/name?', (req, res) => {
+  console.log("getting location by name")
   Location.findOne(
     { name: req.query["name"] }, (err, loc) => {
         if (err)
@@ -338,7 +441,7 @@ app.get('/location/name?', (req, res) => {
 });
 
 // Get one location by loc_id in JSON eg'/location/id?id=1'
-app.get('/location/id?', (req, res) => {
+app.get('/location/get/id?', (req, res) => {
   // console.log(req.query["id"])
   Location.findOne(
     { loc_id: req.query["id"] }, (err, loc) => {
@@ -355,5 +458,67 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-app.listen(8000)
+// Add location to fav_loc list of user, eg '/favourite/ryan/10'
+app.put('/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
+  // User.find({ username: req.session.passport.user }, (err, user) => {
+  // console.log(req.params)
+  User.findOne({ username: req.params.username }, async (err, user) => {
+    if (err)
+      res.send('Error: cannot find user')
+    else if (!user)
+      res.send('No such user')
+    else {
+      console.log(user)
+      if (!user.fav_loc.includes(req.params.loc_id)){
+        user.fav_loc.push(req.params.loc_id)
+        await user.save()
+      }
+      // console.log(user)
+      res.send(user)
+    }
+  })
+})
 
+// Get list of fav_loc of one user
+app.get('/favourite', (req, res)=> {
+  User.findOne({username: req.session.passport.user}, (err, e)=> {
+    if (err)
+      res.send(err)
+    else {
+     res.send(e.fav_loc)
+    }
+  })
+})
+
+// Delete loc from fav_loc 
+
+// get user object if logged in
+app.get('/userloggedin', (req, res) => {
+  console.log(req.session);
+  console.log(req.session.passport);
+  if (req.session.passport != undefined){
+    console.log("user is auth.")
+    User.findOne({username: req.session.passport.user}, (err, user) => {
+    if (err)
+      res.send(err)
+    else {
+      res.send(user)
+    }
+    })
+  }
+  else res.send(undefined)
+  
+})
+// app.get('/userloggedin/:usename',  (req, res) => {
+//   console.log(req.params.username)
+//   User.findOne({usename: req.params.username},  (err, user) => {
+//     if (err)
+//       res.send(err)
+//     else {
+//       // console.log(user)
+//       res.send(user)
+//     }
+//   })
+// })
+
+app.listen(8000)

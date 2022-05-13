@@ -8,6 +8,7 @@ import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
 import { Table, Button } from 'react-bootstrap';
+import {BrowserRouter, Routes, Route, Link} from "react-router-dom";
 
 
 
@@ -225,7 +226,8 @@ function Location_Table(props){
               <td>{item.lat}</td>
               <td>{item.lng}</td>
               <td>{item.timezone_id}</td>
-              <td><Button href={'./Singlelocation/' + item.name}>View Details</Button></td>
+              <td><Link to={'./Singlelocation/' + item.name}>View Details</Link></td>
+              {/* <td><Button href={'./Singlelocation/' + item.name}>View Details</Button></td> */}
               <td><Button onClick={()=>console.log(item)}>Location</Button></td>
             </tr>
           </tbody>
