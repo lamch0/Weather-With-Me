@@ -281,6 +281,15 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
+
+function checkAdmin(req, res, next ) {
+  User.findOne({username: req.session.passport.user}, (err, e)=> {
+    if (err)
+      return err
+    else if (e.user_type == "admin")
+      next()
+  })
+}
 // End of account management (login logout register) section ===========================================
 
 // // add new location to the database (for initial hardcoding)
@@ -471,7 +480,15 @@ app.put('/favourite/:username/:loc_id', (req, res) => {
 })
 
 // Get list of fav_loc of one user
-
+app.get('/favourite/', (req, res)=> {
+  User.findOne({username: req.session.passport.user}, (err, e)=> {
+    if (err)
+      res.send(err)
+    else {
+     res.send(e.fav_loc)
+    }
+  })
+})
 // Delete loc from fav_loc 
 
 app.listen(8000)
