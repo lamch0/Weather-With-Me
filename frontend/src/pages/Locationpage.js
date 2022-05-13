@@ -8,76 +8,58 @@ import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
 import { Table, Button } from 'react-bootstrap';
+import axios from "axios";
 // import { init } from '../../../models/location_model';
 
-let location_data =
-{
-        "id":123,
-        "region": "Asia",
-        "country": "China",
-        "name": "Hong Kong",
-        "lat": 22.302711,
-        "lng": 114,
-        "timezone_id":"8",
-        "comments":[{"user": "user1", "content": "hi"}, {"user": "user2", "content": "hi"}]
-}
-
 let loc = window.location.href.replace("http://localhost:3000/Singlelocation/", "").replace("%20", " ");
-
 let url = "http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + loc + "&aqi=no";
 
-window.onload = () => {
-  fetch(url)
-  .then(response => response.json())
-  .then(data => {
-    return (
-      <Locationpage loc={data}></Locationpage>
-    )
-  })
-}
+function Locationpage() {
 
-class Locationpage extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      location: {},
-      current: {}
-    };
-  }
+  const [weather, setWeather] = useState([{}]);
 
-  render() {
-    console.log(this.props.loc)
+    useEffect(() => {
+        axios.get(url)
+        .then((response) => {
+        setWeather(response.data);
+        });
+        }, []);
+  try{
+    console.log(weather.location.name)
     return (
       <>
-    <div className='banner'>
+      <div className='banner'>
 
-      <div id='icon'><Ti.TiWeatherCloudy/></div>
-      <div id='title' onClick={()=>{window.location.pathname="/"}}>Weathering with ME</div>
+        <div id='icon'><Ti.TiWeatherCloudy/></div>
+        <div id='title' onClick={()=>{window.location.pathname="/"}}>Weathering with ME</div>
 
-      <div className='banner-right'>
+        <div className='banner-right'>
 
-        <div id='icon'><Fa.FaUserCircle/></div>
-        <div id='text'>Username</div>
-        <div id='vertical-line'></div>
-        <div id='icon'><Bs.BsFillBookmarkHeartFill/></div>
-        <div id='text'>Favourite</div>
-        <div id='vertical-line'></div>
-        <div id='icon'><Md.MdLogout/></div>
-        <div id='text'>Logout</div>
+          <div id='icon'><Fa.FaUserCircle/></div>
+          <div id='text'>Username</div>
+          <div id='vertical-line'></div>
+          <div id='icon'><Bs.BsFillBookmarkHeartFill/></div>
+          <div id='text'>Favourite</div>
+          <div id='vertical-line'></div>
+          <div id='icon'><Md.MdLogout/></div>
+          <div id='text'>Logout</div>
 
+        </div>
       </div>
-    </div>
-    <div className='margin'></div>
-    <div className='container'>
-      <h1 className='text-center'>{loc}</h1>
-      {/* <SimpleMap location={}/> */}
-      <hr></hr>
-      {/* <LocationInfo location={this.state.location} current={this.state.current}></LocationInfo> */}
-      <hr></hr>
-      <CommentArea comments={location_data.comments}></CommentArea>
-    </div>
-    </>
-    );
+      <div className='margin'></div>
+      <div className='container'>
+        <h1 className='text-center'>{loc}</h1>
+
+        <SimpleMap location={weather.location}/>
+        <hr></hr>
+        <LocationInfo data={weather}></LocationInfo>
+        <hr></hr>
+        <CommentArea></CommentArea>
+      </div>
+      </>
+    )
+  }catch(e){
+    return("Error occur" + e)
   }
 }
 
@@ -103,6 +85,7 @@ class SimpleMap extends Component {
 
 class LocationInfo extends Component {
   render() {
+    console.log(this.props.data.current)
     return (
       <>
         <h1 className="text-center">Location Information</h1>
@@ -119,12 +102,35 @@ class LocationInfo extends Component {
             </thead>
             <tbody>
                 <tr>
-                  <td>{this.props.location.region}</td>
-                  <td>{this.props.location.country}</td>
-                  <td>{this.props.location.name}</td>
-                  <td>{this.props.location.lat}</td>
-                  <td>{this.props.location.lon}</td>
-                  <td>{this.props.location.tz_id}</td>
+                  <td>{this.props.data.location.region}</td>
+                  <td>{this.props.data.location.country}</td>
+                  <td>{this.props.data.location.name}</td>
+                  <td>{this.props.data.location.lat}</td>
+                  <td>{this.props.data.location.lon}</td>
+                  <td>{this.props.data.location.tz_id}</td>
+                </tr>
+              </tbody>
+        </Table>
+        <br></br>
+        <Table striped bordered hover>
+          <thead>
+              <tr>
+                <th id="table_title">Temperature</th>
+                <th id="table_title">Wind Speed</th>
+                <th id="table_title">Wind Direction</th>
+                <th id="table_title">Humidity</th>
+                <th id="table_title">Precipitation</th>
+                <th id="table_title">Visibility</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <td>{this.props.data.current.temp_c} degree celsius</td>
+                  <td>{this.props.data.current.wind_kph} kph</td>
+                  <td>{this.props.data.current.wind_dir}</td>
+                  <td>{this.props.data.current.humidity}</td>
+                  <td>{this.props.data.current.precip_mm} mm</td>
+                  <td>{this.props.data.current.vis_km} km</td>
                 </tr>
               </tbody>
         </Table>
@@ -133,45 +139,97 @@ class LocationInfo extends Component {
   }
 }
 
-class CommentArea extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: "",
-      comment: ""
-    };
-  }
-  
-  handleComment(comment) {
-    this.setState({comment: comment.target.value});
+function deleteComment(commentId) {
+
+  fetch("http://localhost:8000/api/comments/delete/" + loc + "/" + commentId + "/1652344369760", {
+      method: "DELETE"
+    })
+      .then(() => {
+        alert("Comment deleted");
+      })
+      .catch((err) => {
+          err.then((err) => {
+              alert("error:" + err);
+          })
+      })
   }
 
-  getComment() {
-    console.log(this.state.comment);
-  }
-  
-  render() {
+function CommentArea() {
+
+    const [comments, setComment] = useState([]);
+    
+    useEffect(() => {
+      axios.get("http://localhost:8000/api/location/getcomment/name?name=" + loc)
+      .then((res) => {
+        setComment(res.data);
+      })
+    }, []);
+
+    try{
+      console.log("comment: " + comments)
+    
     return (
       <>
         <h1 className="text-center">Comment Area</h1>
-        {this.props.comments.map((file, index) => <Comment i={index} key={index}/>)}
+        <div className="commentArea">
+          {comments.map((comment) => 
+          <>
+          <div id={"comment" + comment.comment_id}>
+          <h4>User: {comment.user_id}</h4>
+          <p>Content: {comment.content} {comment.comment_id}</p>
+          <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id)}>Delete Comment</Button>
+          <hr></hr>
+          </div>
+        </>)}
+        </div>
         <h2>Add Comment</h2>
-        <textarea className="w-100" value={this.state.comment} onChange={this.handleComment.bind(this)}></textarea>
-        <Button onClick={this.getComment.bind(this)}>Add Comment</Button>
+        <Comment></Comment>
       </>
     )
+  } catch(e) {
+    return("No Comment")
   }
 }
 
-function Comment(props) {
-    let i = props.i
-    return (
-      <>
-        <h4>Name: {location_data.comments[i].name}</h4>
-        <p>Content: {location_data.comments[i].comment}</p>
-        <hr></hr>
-      </>
-    )
+function addComment() {
+
+  if(document.getElementById("commentBox").value == ""){
+      alert("Please Enter Comment");
+      return;
+  } else {
+    let comment = document.getElementById("commentBox").value;
+    console.log(comment);
+  
+  
+  let bodytext = "user_id=1652344369760" + "&content=" + comment;
+
+  fetch("http://localhost:8000/api/comments/" + loc, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded"},
+      body: bodytext})
+      .then((res) => {
+          if(!res.ok){
+              throw res.text(res);
+          }
+          return res.text(res);
+      })
+      .then((res) => {
+          document.getElementById("commentBox").value = "";
+          console.log(res);
+      })
+      .catch((err) => {
+          console.log(err);
+      })
+  }
+}
+
+function Comment() {
+  return (
+    <>
+      <textarea className="w-100" id="commentBox"></textarea>
+      <Button onClick={addComment.bind(this)}>Add Comment</Button>
+    </>
+  )
 }
 
 export default Locationpage
