@@ -15,24 +15,43 @@ db.on('error', console.error.bind(console, 'Connection error:'));
 //Upon opening the database successuflly
 db.once('open', function () {
     console.log("Connection is open...")});
+
+// aquire database schema models
 const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
 const cors = require('cors');
 app.use(cors());
 
+const dotenv = require('dotenv')
+dotenv.config({path: './.env'})
 const bodyParser = require('body-parser');
 const res = require('express/lib/response');
 app.use(bodyParser.urlencoded({extended: true}));
+
+// creating passport for login 
 const initializePassport = require('./utils/passport-config')
 initializePassport(
   passport,
 //   email => users.find(user => user.email === email),
-  username => users.find(user => user.username === username),
-  id => users.find(user => user.id === id)
+  // username => users.find(user => user.username === username),
+  // id => users.find(user => user.id === id),
+
+  async (username) => {
+    const userFound = await User.findOne({username: username});
+    return userFound;
+  },
+  async (id) => {
+    const userFound = await User.findOne({user_id: id});
+    return userFound;
+  } 
 )
 
-const users = []
+app.get('/user/:username', async (req, res) => {
+  const user = await User.findOne({username: req.params.username})
+  res.send(user)
+})
+// const users = []
 
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
@@ -48,7 +67,8 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('profile.ejs', { username: req.user.username })
+  console.log('logged in to ' + req.session.passport.user)
+  res.render('profile.ejs', { username: req.session.passport.user })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -65,22 +85,37 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
 })
 
+
+
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    users.push({
-      id: Date.now().toString(),
+    const newUser = new User({
+      user_id: Date.now().toString(),
       username: req.body.username,
-    //   email: req.body.email,
-      password: hashedPassword
+      password: hashedPassword,
+      fav_loc: []
     })
+    await newUser.save()
+    
+    // users.push({
+    //   id: Date.now().toString(),
+    //   username: req.body.username,
+    // //   email: req.body.email,
+    //   password: hashedPassword
+    // })
     res.redirect('/login')
   } catch {
+    console.log(error)
     res.redirect('/register')
   }
 })
 
+// Logging out from the session
 app.delete('/logout', (req, res) => {
+  req.session.destroy(() => {
+    console.log('session destroyed')
+  })
   req.logOut()
   res.redirect('/login')
 })
@@ -138,7 +173,7 @@ app.post("/location",(req,res)=>{
   })
 })
 //==========================End of the Create Location section =======================================================================
-//Read Location (admin side)
+//Read Location by loc_id (admin side)
 app.get('/location/:loc_id',(req,res)=>{
   Location.findOne(
     {loc_id: req.params['loc_id']},
@@ -246,31 +281,79 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
+// End of account management (login logout register) section ===========================================
 
-
-app.post('/addlocation', (req, res) => {
-	var newLocation = req.query
-	console.log(newLocation)
-	Location.find(
-		(err, locations) => {
-			var maxId = Math.max(...locations.map(e => e.loc_id), 0)+1
-			// console.log(maxId)
-			Location.create({
-				loc_id: maxId,
-				name: newLocation.name,
-				lat: newLocation.lat,
-				lon: newLocation.lon,
-				comments: []
-			}, (err, location) => {
-				if (err)
-					return handleError(err);
-				else 
-					console.log(location)
-					res.send(location)
+// // add new location to the database (for initial hardcoding)
+// app.post('/addlocation', (req, res) => {
+// 	var newLocation = req.query
+// 	console.log(newLocation)
+// 	Location.find(
+// 		(err, locations) => {
+// 			var maxId = Math.max(...locations.map(e => e.loc_id), 0)+1
+// 			// console.log(maxId)
+// 			Location.create({
+// 				loc_id: maxId,
+// 				name: newLocation.name,
+// 				lat: newLocation.lat,
+// 				lon: newLocation.lon,
+// 				comments: []
+// 			}, (err, location) => {
+// 				if (err)
+// 					return handleError(err);
+// 				else 
+// 					console.log(location)
+// 					res.send(location)
 				
-			})
-		}
-	)
-})
+// 			})
+// 		}
+// 	)
+// })
 
-app.listen(3000)
+// Get all locations in JSON
+app.get('/locations', (req, res) => {
+  Location.find({})
+  .exec(function (err, loc) {
+    if (err)
+      res.send(err)
+    else 
+      res.send(loc)  
+  });
+});
+//===========================End Get all locations part=====================================
+
+// Get one location by name in JSON eg'/location/name?name=Tokyo'
+app.get('/location/name?', (req, res) => {
+  Location.findOne(
+    { name: req.query["name"] }, (err, loc) => {
+        if (err)
+            res.send(err);
+        if (!loc) {
+            res.status(404)
+            res.send("Can't find this location")
+        }
+        else
+            res.send(loc)
+    }
+  )
+});
+
+// Get one location by loc_id in JSON eg'/location/id?id=1'
+app.get('/location/id?', (req, res) => {
+  // console.log(req.query["id"])
+  Location.findOne(
+    { loc_id: req.query["id"] }, (err, loc) => {
+      if (err)
+        res.send(err);
+      if (!loc) {
+        res.status(404)
+        res.send("Can't find this location")
+      }
+      else  
+        res.send(loc)
+    }
+  )
+});
+//===========================End Get one location part=====================================
+
+app.listen(8000)
+
