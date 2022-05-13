@@ -68,9 +68,17 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
 
+
+// when logged in, check user type
 app.get('/', checkAuthenticated, (req, res) => {
   console.log('logged in to ' + req.session.passport.user)
-  res.render('profile.ejs', { username: req.session.passport.user })
+  if (user == 'admin'){
+    res.send("admin").render('profile.ejs', { username: "Admin account" })
+  }
+  else {
+    res.send("user").render('profile.ejs', { username: req.session.passport.user })
+  }
+  // res.render('profile.ejs', { username: req.session.passport.user })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -305,8 +313,7 @@ app.put("/api/location/update/:loc_id",(req,res)=>{
         }
       }
     }
-    })
-          
+  })     
 })
 // ==========================End of the Update Location section =======================================================================
 // Delete Location (admin side)
@@ -559,6 +566,24 @@ app.get('/api/favourite', (req, res)=> {
 })
 
 // Delete loc from fav_loc 
+app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
+  User.findOne({ username: req.params.username }, async (err, user) => {
+    if (err)
+      res.send('Error: cannot find user')
+    else if (!user)
+      res.send('No such user')
+    else {
+      console.log("Old user: "+user)
+      const index = user.fav_loc.indexOf(req.params.loc_id)
+      if (index > -1){
+        user.fav_loc.splice(index, 1)
+      }
+      console.log("New user: "+user)
+      await user.save()
+      res.send(user)
+    }
+  })
+})
 
 // get user object if logged in
 app.get('/api/userloggedin', (req, res) => {
