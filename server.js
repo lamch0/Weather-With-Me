@@ -121,7 +121,73 @@ app.delete('/logout', (req, res) => {
   req.logOut()
   res.redirect('/login')
 })
-
+// Create Comment (user side)
+app.post("/comments/:name",(req,res)=> {
+  var new_comment_id;
+  Comment.find().
+  sort({comment_id: -1})
+  .exec((err,e)=>{
+    if(err)
+      {res.send(err)}
+    else
+      if(req.body['content'] == null || req.body['content'] == ""){
+        res.set('Content-Type', 'text/plain');
+        res.status(404).send('The content field does not provide. ');
+      }
+      else{
+        if(e.length == 0 ){
+          new_comment_id = 1;
+        }
+        else{
+          new_comment_id = e[0].comment_id+1;
+        }
+        User.findOne({user_id: req.body['user_id']},(err, user) =>{
+          if(err)
+          {res.send(err)}
+          else{
+            
+            if(user.user_id == null){
+              res.set('Content-Type','text/plain');
+              res.send("Can not create a new comment because the user_id is invalid.");
+            }
+            else{
+              Comment.create({
+                comment_id: new_comment_id,
+                user_id: user.user_id,
+                content: req.body['content']
+              },(err,e)=>{
+                if(err)
+                  {res.send(err)}
+                else{
+                  
+                  Comment.findOne({comment_id: new_comment_id})
+                  .exec((err,fcom)=>{
+                    if(err)
+                    {res.send(err)}
+                    else{
+                      Location.findOne({name: req.params['name']}).exec(async(err,loc)=>{
+                          if(err)
+                            {res.send(err)}
+                          else{
+                            loc.comments.push(fcom._id)
+                            await loc.save()
+                            res.status(201).send("{<br>"+
+                            '"comment_id": ' + fcom.comment_id + ",<br>"+
+                            '"user_id": <br>{<br>"user_id": '+ fcom.user_id +',<br>}<br>'
+                            +'"content": '+fcom.content + "<br>}<br>")
+                          }
+                      })
+                    }
+                  })
+                }
+              })
+            }
+          }
+        })
+      }
+  })
+})
+// ============================== End of Create comment section ========================================
 //Create Location (admin side)
 app.post("/api/location",(req,res)=>{
   var new_location_id;
