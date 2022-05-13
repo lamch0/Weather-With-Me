@@ -491,16 +491,21 @@ app.get('/favourite', (req, res)=> {
 })
 
 // Delete loc from fav_loc 
+app.delete()
 
 // get user object if logged in
-app.get('/userloggedin', checkAuthenticated, (req, res) => {
-  User.findOne({username: req.session.passport.user}, (err, user) => {
+app.get('/userloggedin', (req, res) => {
+  if (req.isAuthenticated){
+    User.findOne({username: req.session.passport.user}, (err, user) => {
     if (err)
       res.send(err)
     else {
       res.send(user)
     }
-  })
+    })
+  }
+  else res.send(undefined)
+  
 })
 // app.get('/userloggedin/:usename',  (req, res) => {
 //   console.log(req.params.username)
