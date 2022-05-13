@@ -205,7 +205,6 @@ app.get('/location/:loc_id',(req,res)=>{
       }
     }
   )
-  
 })
 //==========================End of the Read Location section =======================================================================
 
@@ -425,7 +424,8 @@ app.delete("/user/delete/:user_id", (req, res) => {
 
 
 // Get one location by name in JSON eg'/location/name?name=Tokyo'
-app.get('/location/name?', (req, res) => {
+app.get('/location/get/name?', (req, res) => {
+  console.log("getting location by name")
   Location.findOne(
     { name: req.query["name"] }, (err, loc) => {
         if (err)
@@ -441,7 +441,7 @@ app.get('/location/name?', (req, res) => {
 });
 
 // Get one location by loc_id in JSON eg'/location/id?id=1'
-app.get('/location/id?', (req, res) => {
+app.get('/location/get/id?', (req, res) => {
   // console.log(req.query["id"])
   Location.findOne(
     { loc_id: req.query["id"] }, (err, loc) => {
@@ -489,6 +489,7 @@ app.get('/favourite/', (req, res)=> {
     }
   })
 })
+
 // Delete loc from fav_loc 
 
 app.listen(8000)
