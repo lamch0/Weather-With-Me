@@ -624,9 +624,7 @@ app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
 
 // get user object if logged in
 app.get('/api/userloggedin', (req, res) => {
-  console.log(req.session);
-  console.log(req.session.passport);
-  if (req.session.passport != undefined){
+  if (req.session.passport){
     console.log("user is auth.")
     User.findOne({username: req.session.passport.user}, (err, user) => {
     if (err)
