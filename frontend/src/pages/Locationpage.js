@@ -86,7 +86,7 @@ class SimpleMap extends Component {
           <GoogleMapReact
             bootstrapURLKeys={{ key: 'AIzaSyDNzUJieo8rD3mAG5ZgZD7dZPEMUeMUuSI' }}
             defaultCenter={{lat: this.props.location.location.lat, lng: this.props.location.location.lon}}
-            defaultZoom={1}
+            defaultZoom={10}
           >
             <div lat={this.props.location.location.lat} lng={this.props.location.location.lon}>
               <img id="pin" src={pin} alt="pin"/>
