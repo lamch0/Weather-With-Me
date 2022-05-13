@@ -198,6 +198,41 @@ app.post("/comments/:name",(req,res)=> {
   })
 })
 // ============================== End of Create comment section ========================================
+//Delete Comment (user side)
+app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
+  Comment.findOne({comment_id: req.params['comment_id']},(err,e) =>{
+    if(err)
+    {res.send(err)}
+    else{
+      console.log(e)
+      if(e == null){
+        res.set('Content-Type','text/plain');
+        res.status(404).send("Could not delete because the comment ID is not exist.");
+      }
+      else{
+        Location.findOne({loc_id: req.params['loc_id']}).exec(async(err,loc)=>{
+          if(err)
+            {res.send(err)}
+          else{
+            const index = loc.comments.indexOf(e._id)
+            if (index > -1){
+              loc.comments.splice(index, 1)
+            }
+            await loc.save()
+            Comment.deleteOne({comment_id: req.params['comment_id']},(err,e)=>{
+              if(err)
+              {res.send(err)}
+              else{
+                res.send('{"result": true}')
+              }
+            })
+          }
+        })
+      }
+    }
+  })
+})
+// ============================== End of Delete comment section ========================================
 //Create Location (admin side)
 app.post("/api/location",(req,res)=>{
   var new_location_id;
