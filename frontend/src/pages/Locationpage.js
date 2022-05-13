@@ -8,8 +8,9 @@ import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
 import pin from "../components/pin.png";
 import { Table, Button } from 'react-bootstrap';
+// import { init } from '../../../models/location_model';
 
-const location_data=
+let location_data =
 {
         "id":123,
         "region": "Asia",
@@ -21,13 +22,37 @@ const location_data=
         "comments":[{"user": "user1", "content": "hi"}, {"user": "user2", "content": "hi"}]
 }
 
-function Locationpage() {
-  return (
-    <>
+let loc = window.location.href.replace("http://localhost:3000/Singlelocation/", "").replace("%20", " ");
+
+let url = "http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + loc + "&aqi=no";
+
+window.onload = () => {
+  fetch(url)
+  .then(response => response.json())
+  .then(data => {
+    return (
+      <Locationpage loc={data}></Locationpage>
+    )
+  })
+}
+
+class Locationpage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      location: {},
+      current: {}
+    };
+  }
+
+  render() {
+    console.log(this.props.loc)
+    return (
+      <>
     <div className='banner'>
 
       <div id='icon'><Ti.TiWeatherCloudy/></div>
-      <div id='title'>Weathering with ME</div>
+      <div id='title' onClick={()=>{window.location.pathname="/"}}>Weathering with ME</div>
 
       <div className='banner-right'>
 
@@ -42,38 +67,36 @@ function Locationpage() {
 
       </div>
     </div>
+    <div className='margin'></div>
     <div className='container'>
-      <h1 className='text-center'>{location_data.name}</h1>
-
-      <SimpleMap location={location_data}/>
+      <h1 className='text-center'>{loc}</h1>
+      {/* <SimpleMap location={}/> */}
       <hr></hr>
-      <LocationInfo location={location_data}></LocationInfo>
+      {/* <LocationInfo location={this.state.location} current={this.state.current}></LocationInfo> */}
       <hr></hr>
       <CommentArea comments={location_data.comments}></CommentArea>
     </div>
     </>
-  )
+    );
+  }
 }
 
 class SimpleMap extends Component {
-  static defaultProps = {
-    zoom: 1
-  };
-
   render() {
     return (
       <>
-        <div id="map">
+        <div id="map" style={{width:"40vw"}}>
           <GoogleMapReact
             bootstrapURLKeys={{ key: 'AIzaSyDNzUJieo8rD3mAG5ZgZD7dZPEMUeMUuSI' }}
-            defaultCenter={{lat: this.props.location.lat, lng: this.props.location.lng}}
-            defaultZoom={this.props.zoom}
+            defaultCenter={{lat: this.props.location.lat, lng: this.props.location.lon}}
+            defaultZoom={1}
           >
-            <div lat={this.props.location.lat} lng={this.props.location.lng}>
-              <img id="pin" src={pin} alt="pin" onClick={() => { window.location.pathname = '/'+this.props.location.id; } } />
+            <div lat={this.props.location.lat} lng={this.props.location.lon}>
+              <img id="pin" src={pin} alt="pin"/>
             </div>
           </GoogleMapReact>
-        </div></>
+        </div>
+      </>
     );
   }
 }
@@ -100,8 +123,8 @@ class LocationInfo extends Component {
                   <td>{this.props.location.country}</td>
                   <td>{this.props.location.name}</td>
                   <td>{this.props.location.lat}</td>
-                  <td>{this.props.location.lng}</td>
-                  <td>{this.props.location.timezone_id}</td>
+                  <td>{this.props.location.lon}</td>
+                  <td>{this.props.location.tz_id}</td>
                 </tr>
               </tbody>
         </Table>
@@ -114,6 +137,7 @@ class CommentArea extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: "",
       comment: ""
     };
   }
