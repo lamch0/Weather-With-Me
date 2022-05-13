@@ -7,14 +7,23 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import * as Ti from "react-icons/ti";
 import  {useEffect, useState} from "react"
 import axios from "axios";
-import { MdPublishedWithChanges } from 'react-icons/md'
 
 function App() {
     const [status, setStatus] = useState(0);
 
     useEffect(() => {
         console.log("useEffect")
-        axios("http://localhost:8000/", {withCredentials: true})
+        // fetch("http://localhost:8000/api/userloggedin", {
+        //     method: "GET"
+        // })
+        // .then((res) => res.text(res))
+        // .then((res) => {console.log(res)})
+
+        axios
+            .get("http://localhost:8000/api/userloggedin" , {withCredentials:true})
+            .then((res) => {
+                console.log(res.data)
+            })
         
     }, [])
 
@@ -23,30 +32,20 @@ function App() {
         function login(){
             let username = document.getElementById("username").value;
             let password = document.getElementById("password").value;
-            // let bodytext = "username=" + username + "&password=" + password;
-            let bodytext = {
-                username : username,
-                password : password
-            }
+            let bodytext = "username=" + username + "&password=" + password;
 
-            axios
-                .post("http://localhost:8000/login", bodytext, {withCredentials:true})
-                .then((res) => res.text(res))
-                .catch((err) => {console.log(err)})
-    
-            // fetch("http://localhost:8000/login", {
-            //     method: "POST",
-            //     headers: { "Content-Type": "application/x-www-form-urlencoded"},
-            //     body: bodytext,
-            //     credentials: 'same-origin'})
-            //     .then((res) => {
-            //         return res.text(res);
-            //     })
-            //     .then((res) => {
-            //         if(res.result){
-            //             setStatus(1);
-            //         }
-            //     })
+            fetch("http://localhost:8000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded"},
+                headers: { "Access-Control-Allow-Origin": "*"},
+                headers: { "Access-Control-Allow-Credentials": "*"},
+                body: bodytext})
+                .then((res) => {
+                    return res.text(res);
+                })
+                .then((res) => {
+                    console.log((res));
+                })
         }
     
         return (
@@ -70,7 +69,7 @@ function App() {
                                     <input type="password" name="password" id="password" placeholder="password" className="form-control" />
                                 </div>
                                 <div className="login-btn">
-                                    <button type="button" className="btn btn-outline-primary" onClick={()=>login()}>Login</button>
+                                    <button type="submit" className="btn btn-outline-primary" onClick={()=>login()}>Login</button>
                                 </div>
                             </form>
                         </div>
@@ -85,10 +84,12 @@ function App() {
         <div className='App'>
             <Router>
             <Routes>
-            {status == 0 && <Route path='/' element={<Loginpage/>} />}
-            {status == 0 && <Route path='/home' element={<Homepage/>} />}
-            {status == 0 && <Route path='/Singlelocation/:location' element={<Locationpage/>} />}
-            {status == 0 && <Route path='/admin' element={<Admin/>} />}
+            <Route path='/login' element={<Loginpage/>} />
+            
+            <Route path='/home' element={<Homepage/>} />
+            <Route path='/Singlelocation/:location' element={<Locationpage/>} />
+
+            <Route path='/admin' element={<Admin/>} />
             </Routes>
             </Router>
             </div>

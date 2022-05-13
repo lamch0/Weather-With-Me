@@ -1,0 +1,35 @@
+.admin_page .title{
+    margin-left:20px;
+}
+
+.admin_page hr{
+    border:2px solid #8c8b8b;
+    width:30%;
+}
+
+.card img{
+    width:150px;
+    align-self:center;
+}
+
+.update-span{
+    margin-left:20px;
+    padding: 5px 0px;
+    font-size: 20px;
+}
+
+.card button{
+    margin-right:10px;
+}
+
+.formdata{
+    margin:20px 20px;
+}
+
+.formdata div label{
+    width:30%; 
+}
+
+.isinvalid{
+    border:red solid;
+}

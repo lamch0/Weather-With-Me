@@ -88,7 +88,7 @@ function UserUpdate(){
             return;
         }
 
-        fetch("http://localhost:8000/user", {
+        fetch("http://localhost:8000/api/user", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded"},
             body: bodytext
@@ -159,7 +159,7 @@ function LocationUpdate(){
         let long = document.getElementById("locationlong").value;
         let bodytext = "name=" + name + "&lat=" + lat + "&long=" + long;
 
-        fetch("http://localhost:8000/location", {
+        fetch("http://localhost:8000/api/location", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded"},
             body: bodytext})
@@ -205,7 +205,7 @@ function LocationUpdate(){
             return;
         }
 
-        fetch("http://localhost:8000/location/" + id)
+        fetch("http://localhost:8000/api/location/" + id)
         .then(res => {
             if(!res.ok){
                 throw res.text(res);
@@ -246,7 +246,7 @@ function LocationUpdate(){
         let long = document.getElementById("locationlong").value;
         let bodytext = "updatedname=" + name + "&updatelat=" + lat + "&updatelon=" + long;
 
-        fetch("http://localhost:8000/location/update/" + id, {
+        fetch("http://localhost:8000/api/location/update/" + id, {
             method: "PUT",
             headers: { "Content-Type": "application/x-www-form-urlencoded"},
             body: bodytext})
@@ -292,7 +292,7 @@ function LocationUpdate(){
             return;
         }
 
-        fetch("http://localhost:8000/location/delete/" + id, {
+        fetch("http://localhost:8000/api/location/delete/" + id, {
             method: "DELETE",
         })
         .then((res) => {
