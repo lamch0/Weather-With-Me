@@ -179,12 +179,12 @@ app.post("/comments/:name",(req,res)=> {
                           if(err)
                             {res.send(err)}
                           else{
-                            loc.comments.push(fcom._id)
-                            await loc.save()
+                            loc.comments.push(fcom._id);
+                            await loc.save();
                             res.status(201).send("{<br>"+
                             '"comment_id": ' + fcom.comment_id + ",<br>"+
                             '"user_id": <br>{<br>"user_id": '+ fcom.user_id +',<br>}<br>'
-                            +'"content": '+fcom.content + "<br>}<br>")
+                            +'"content": '+fcom.content + "<br>}<br>");
                           }
                       })
                     }
@@ -207,9 +207,14 @@ app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
       console.log(e)
       if(e == null){
         res.set('Content-Type','text/plain');
-        res.status(404).send("Could not delete because the comment ID is not exist.");
+        res.status(404).send("Could not delete it because the comment ID is not exist.");
       }
       else{
+        if(e.user_id != req.body['user_id']){
+          res.set('Content-Type','text/plain');
+          res.status(404).send("Could not delete it because you are not the owner of the comment.");
+        }
+        else{
         Location.findOne({loc_id: req.params['loc_id']}).exec(async(err,loc)=>{
           if(err)
             {res.send(err)}
@@ -228,6 +233,7 @@ app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
             })
           }
         })
+      }
       }
     }
   })
