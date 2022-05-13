@@ -321,6 +321,100 @@ app.get('/locations', (req, res) => {
 });
 //===========================End Get all locations part=====================================
 
+//===========================Start user part=====================================
+
+// Create user (admin side)
+app.post("/user", async(req,res) => {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+    const newUser = new User({
+      user_id: Date.now().toString(),
+      username: req.body.username,
+      password: hashedPassword,
+      fav_loc: []
+    })
+    await newUser.save()
+    res.send(newUser)
+})
+
+// Read user (admin side)
+app.get("/user/:user_id", (req, res) => {
+  User.findOne(
+    {user_id: req.params['user_id']},
+    'username password'
+  ).exec(
+    (err, e)=>{
+      if (err)
+        res.send(err)
+      else {
+        if (e == null) {
+          res.set('Content-Type', 'text/plain')
+          res.status(404).send('The given user ID is not found.')
+        } else {
+          res.json(e)
+        }
+      }
+    }
+  )
+})
+
+// Update user (admin side)
+app.put("/user/update/:user_id", async(req, res) => {
+  const hashedPassword = await bcrypt.hash(req.body['updatedpassword'], 10)
+  User.findOne({user_id: req.params['user_id']})
+  .exec(
+    (err, e) => {
+      if (err)
+        res.send(err)
+      else {
+        if (e == null ) {
+          res.set('Content-Type', 'text/plain')
+          res.status(404).send('The given user ID is not found')
+        } else {
+          if (req.body['updatedname'] == "" || req.body['updatedname'] == null){
+            res.set('Content-Type','text/plain');
+            res.status(404).send('The username field does not provide.');
+          } else if (req.body['updatedpassword'] == "" || req.body['updatedpassword'] == null){
+            res.set('Content-Type','text/plain');
+            res.status(404).send('The password field does not provide.');
+          }
+          else {
+            e.username = req.body['updatedname']
+            e.password = hashedPassword
+            e.save()
+            res.json(e)
+          }
+        }
+      }
+    }
+  )
+})
+
+// Delete user (admin side)
+app.delete("/user/delete/:user_id", (req, res) => {
+  User.findOne({user_id: req.params['user_id']})
+  .exec((err, e)=> {
+    if (err)
+      res,send(err)
+    else {
+      if (e == null) {
+        res.set('Content-Type','text/plain');
+        res.status(404).send("Could not FIND the user id delete.");
+      } else {
+        User.remove({user_id: req.params['user_id']}, (err, del)=> {
+          if (err)
+            res.send(err)
+          else 
+            res.send('{"result": true}')
+        })
+      }
+    }
+  })
+})
+//===========================End user part=====================================
+
+
+
+
 // Get one location by name in JSON eg'/location/name?name=Tokyo'
 app.get('/location/name?', (req, res) => {
   Location.findOne(
@@ -355,5 +449,9 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
+// Get favourite list 
+app.get('/favourite/:user_id', (req, res)=> {
+  User.findOne({user_id: req.params.user})
+})
 app.listen(8000)
 
