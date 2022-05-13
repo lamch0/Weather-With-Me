@@ -355,5 +355,14 @@ app.get('/location/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
+// Add location to fav_loc list of user
+app.put('/favourite/:loc_id', (req, res) => {
+  
+})
+
+// Get list of fav_loc of one user
+
+// Delete loc from fav_loc 
+
 app.listen(8000)
 
