@@ -1,5 +1,33 @@
 # CSCI2720_proj
 
+The application requires frontend and backend server.
+
+Ways to start the project server :
+Frontend:	1. open the terminal
+		2. cd to the frontend folder
+		3. npm start
+
+Backend:	1. open the terminal
+		2. node server.js
+
+To download their required libraries: 
+npm install
+
+
+Site URL:
+For non-user:
+	1. http://lcoalhost:3000/
+
+For user:
+	1. http://localhost:3000/
+	2. http://localhost:3000/Singlelocation/:location
+	3. http://localhost:3000/favourite/:username
+
+For admin:
+	1. http://localhost:3000/
+
+**We have read the Academic Honesty Policy carefully**
+
 ## Group members
 
 1155143373 Lam Lok Hin
@@ -79,6 +107,7 @@ Front End
 	Roy, King, Edmond
 
 Back End
+
 	Ryan, Gordon, Ted, Roy
 
 
