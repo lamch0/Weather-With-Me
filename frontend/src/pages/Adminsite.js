@@ -6,8 +6,24 @@ import locationimg from "../components/location.png"
 import weatherapiimg from "../components/weatherapi.png"
 import {useState} from "react"
 import './Adminsite.css'
+import axios from "axios";
+
 
 function Admin(){
+    const [state, setState] = useState(0);
+    const [info, setInfo] = useState([]);
+
+    function logout(){
+        axios
+            .delete("http://localhost:8000/api/logout", {withCredentials:true})
+            .then((res) => {
+                window.location.reload(false);
+            })
+            .catch((err) => {
+                alert(err);
+            })
+    }
+
     return(
         <>
             <div className='banner'>
@@ -18,7 +34,7 @@ function Admin(){
                     <div id='text'>Admin</div>
                     <div id='vertical-line'></div>
                     <div id='icon'><Md.MdLogout/></div>
-                    <div id='text'>Logout</div>
+                    <div id='text' onClick={()=>logout()}>Logout</div>
                 </div>
             </div>
             <div className="admin_page">
@@ -37,29 +53,68 @@ function Admin(){
                         <UserUpdate/>
                     </div>
                 </div>
+                {state == 1 && <Table info={info}/>}
             </div>
         </>
     )
-}
-export default Admin;
+
 
 
 
 function Update(){
-    const [state, setState] = useState(0);
 
     function refresh(){
-
+        setState(0);
+        fetch("http://localhost:8000/api/locations", {
+            method: "GET"
+        })
+        .then((res) => {
+            return res.text(res);
+        })
+        .then((res) => {
+            res = JSON.parse(res);
+            let inform = [];
+            for(let i = 0; i < 2; i++){
+                let check = [];
+                fetch("http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + res[i].name + "&aqi=no", {
+                    method: "get"
+                })
+                .then((res) => {
+                    if(!res.ok){
+                        throw "Error"
+                    }
+                    return res.text(res);
+                })
+                .then((res) => {
+                    res = JSON.parse(res);
+                    check.push(res.location.name);
+                    check.push(res.location.lat);
+                    check.push(res.location.lon);
+                    check.push(res.location.localtime);
+                    check.push(res.current.temp_c);
+                    check.push(res.current.wind_kph);
+                    check.push(res.current.wind_dir);
+                    check.push(res.current.humidity);
+                    check.push(res.current.precip_mm);
+                    check.push(res.current.vis_km);
+                    inform.push(check);
+                    
+                    if(i == 1){
+                        setState(1);
+                        setInfo(inform);
+                    }
+                })
+            }
+        })
     }
 
     return(
         <div className="card">
             <img src={weatherapiimg} className="card-img-top" alt="User image" />
             <div className="card-body">
-                <h5 className="card-title">Refresh Data</h5>
-                <p className="card-text">Fetch all the data from weatherapi and refresh the database</p>
-                <button className="btn btn-primary" onClick={refresh()}>Refresh</button>
-                {state==1 && <span className="update-span">Done !</span>}
+                <h5 className="card-title">Request Data</h5>
+                <p className="card-text">Fetch all the data from weatherapi</p>
+                <button className="btn btn-primary" onClick={()=>refresh()}>Request</button>
             </div>
         </div>
     )
@@ -70,18 +125,162 @@ function Update(){
 function UserUpdate(){
 
     function createUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let bodytext = "username=" + username + "&password=" + password;
+
+        if(username == ""){
+            document.querySelector("#username").classList.add("isinvalid");
+        }
+        if(password == ""){
+            document.querySelector("#password").classList.add("isinvalid");
+        }
+        if(username == "" || password == ""){
+            alert("username or password cannot be blank.")
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            body: bodytext
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res);
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            alert("Success create! " + res);
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
     }
 
     function retrieveUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let userid = document.getElementById("userid").value;
+        if(userid == ""){
+            alert("User id cannot be blank.")
+            document.querySelector("#userid").classList.add("isinvalid");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/" + userid, {
+            method: "GET"
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res)
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            res = JSON.parse(res);
+            document.querySelector("#username").value = res.username;
+            document.querySelector("#password").value = res.password;
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
     }
 
     function updateUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let userid = document.getElementById("userid").value;
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let textbody = "updatedname=" + username + "&updatedpassword=" + password;
+
+        if(userid == ""){
+            document.querySelector("#userid").classList.add("isinvalid");
+        }
+        if(username == ""){
+            document.querySelector("#username").classList.add("isinvalid");
+        }
+        if(password == ""){
+            document.querySelector("#password").classList.add("isinvalid");
+        }
+        if(userid == "" || username == "" || password == ""){
+            alert("User id, username and password cannot be blank");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/update/" + userid, {
+            method: "PUT",
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            body: textbody
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res);
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            alert("Success update! " + res);
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
     }
 
     function deleteUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
+
+        let userid = document.getElementById("userid").value;
+        if(userid == ""){
+            document.querySelector("#userid").classList.add("isinvalid");
+            alert("User id cannot be blank");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/delete/" + userid, {
+            method: "Delete"
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res)
+            }
+            return res.text(res);
+        })
+        .then((res) => {
+            alert("Success delete! ");
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
 
     }
 
@@ -110,10 +309,10 @@ function UserUpdate(){
                         <input type="text" name="password" id="password" placeholder="password"/>
                     </div>
                 </form>
-                <button className="btn btn-primary" onClick={createUser()}>Create</button>
-                <button className="btn btn-primary" onClick={retrieveUser()}>Retreive</button>
-                <button className="btn btn-primary" onClick={updateUser()}>Update</button>
-                <button className="btn btn-primary" onClick={deleteUser()}>Delete</button>
+                <button className="btn btn-primary" onClick={() => createUser()}>Create</button>
+                <button className="btn btn-primary" onClick={() => retrieveUser()}>Retreive</button>
+                <button className="btn btn-primary" onClick={() => updateUser()}>Update</button>
+                <button className="btn btn-primary" onClick={() => deleteUser()}>Delete</button>
             </div>
         </div>
     )
@@ -134,7 +333,7 @@ function LocationUpdate(){
         let long = document.getElementById("locationlong").value;
         let bodytext = "name=" + name + "&lat=" + lat + "&long=" + long;
 
-        fetch("http://localhost:8000/location", {
+        fetch("http://localhost:8000/api/location", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded"},
             body: bodytext})
@@ -180,7 +379,7 @@ function LocationUpdate(){
             return;
         }
 
-        fetch("http://localhost:8000/location/" + id)
+        fetch("http://localhost:8000/api/location/" + id)
         .then(res => {
             if(!res.ok){
                 throw res.text(res);
@@ -221,7 +420,7 @@ function LocationUpdate(){
         let long = document.getElementById("locationlong").value;
         let bodytext = "updatedname=" + name + "&updatelat=" + lat + "&updatelon=" + long;
 
-        fetch("http://localhost:8000/location/update/" + id, {
+        fetch("http://localhost:8000/api/location/update/" + id, {
             method: "PUT",
             headers: { "Content-Type": "application/x-www-form-urlencoded"},
             body: bodytext})
@@ -267,7 +466,7 @@ function LocationUpdate(){
             return;
         }
 
-        fetch("http://localhost:8000/location/delete/" + id, {
+        fetch("http://localhost:8000/api/location/delete/" + id, {
             method: "DELETE",
         })
         .then((res) => {
@@ -330,3 +529,43 @@ function LocationUpdate(){
         </div>
     )
 }
+
+function Table({info}){
+    return(
+    <div className="text-center">
+                    <table className="table">
+                        <tbody>
+                            <tr>
+                                <td>Name</td>
+                                <td>Latitude</td>
+                                <td>Longitude</td>
+                                <td>Local Time</td>
+                                <td>Temp_c</td>
+                                <td>Wind KPH</td>
+                                <td>Wind DIR</td>
+                                <td>Humidity</td>
+                                <td>Precip_mm</td>
+                                <td>Vis_km</td>
+                            </tr>
+                            {info.map((element, index) =>  {
+                                return(
+                                <tr>
+                                <td>{element[0]}</td>
+                                <td>{element[1]}</td>
+                                <td>{element[2]}</td>
+                                <td>{element[3]}</td>
+                                <td>{element[4]}</td>
+                                <td>{element[5]}</td>
+                                <td>{element[6]}</td>
+                                <td>{element[7]}</td>
+                                <td>{element[8]}</td>
+                                <td>{element[9]}</td>
+                                </tr>)
+                            })}
+                        </tbody>
+                    </table>
+                </div>)
+}
+
+}
+export default Admin;

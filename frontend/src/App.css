@@ -1,1 +1,74 @@
 
+.loginpage{
+    height:100vh;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("./components/blue_sky.gif");
+    background-position: center;
+    background-size: cover;
+}
+
+.loginform{
+    border-radius: 10px;
+    border: 1.5px solid #7dc7ff;
+    background: linear-gradient(#f2f9ff, #7dc7ff);
+}
+
+.loginform .title{
+    margin:20px 0px;
+}
+
+.loginform .title :nth-child(1){
+    font-family:'Brush Script MT', cursive;
+}
+
+.login-input-field input{
+    width:100%;
+    margin:0 2.5px;
+    font-size:10px;
+}
+
+.loginform .logo{
+    text-align: center;
+}
+
+.loginform .logo svg{
+    height:70px;
+    width:70px;
+    border-radius:50%;
+    color:white;
+    background-color: #89C4F4;
+}
+
+
+.login-input-field{
+    margin:10px 30px;
+    font-size:15px;
+}
+
+.login-btn{
+    display:flex;
+    justify-content: center;
+    align-items:center;
+    margin:25px 0;
+}
+
+.login-btn button{
+    background-color: #f2f9ff;
+}
+
+.fadeInDown{
+    animation-name: fadeInDown;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+}
+
+@keyframes fadeInDown{
+    from{
+        transform: translateY(-500px)
+    }
+    100%{
+        transform: translateY(0px)
+    }
+}

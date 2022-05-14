@@ -33,3 +33,8 @@
 .isinvalid{
     border:red solid;
 }
+
+.table{
+    margin-left:auto;
+    margin-right:auto;
+}

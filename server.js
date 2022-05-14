@@ -23,7 +23,7 @@ const Location = require("./models/location_model");
 const User = require('./models/user_model')
 const Comment = require('./models/comment_model')
 const cors = require('cors');
-app.use(cors());
+app.use(cors({origin:"http://localhost:3000", credentials:true}));
 
 const dotenv = require('dotenv')
 dotenv.config({path: './.env'})
@@ -69,34 +69,53 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 
 
-// when logged in, check user type
-app.get('/', checkAuthenticated, (req, res) => {
-  // if (req.session.passport.user){
-  //   console.log('logged in to ' + req.session.passport.user)
-  // }
-  // if (user == 'admin'){
-  //   res.send("admin")//.render('profile.ejs', { username: "Admin account" })
-  // }
-  // else {
-  //   res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
-  // }
-  res.render('profile.ejs', { username: req.session.passport.user })
-})
+// // when logged in, check user type
+// app.get('/', checkAuthenticated, (req, res) => {
+//   // if (req.session.passport.user){
+//   //   console.log('logged in to ' + req.session.passport.user)
+//   // }
+//   // if (user == 'admin'){
+//   //   res.send("admin")//.render('profile.ejs', { username: "Admin account" })
+//   // }
+//   // else {
+//   //   res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
+//   // }
+//   res.render('profile.ejs', { username: req.session.passport.user })
+// })
 
-app.get('/login', checkNotAuthenticated, (req, res) => {
-  res.render('login.ejs')
-})
+// app.get('/login', checkNotAuthenticated, (req, res) => {
+//   res.render('login.ejs')
+// })
 
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-  failureFlash: true
-}))
+// app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+//   successRedirect: '/',
+//   failureRedirect: '/login',
+//   failureFlash: true
+// }))
+
+// app.get('/register', checkNotAuthenticated, (req, res) => {
+//   res.render('register.ejs')
+// })
+
+app.post('/login', checkNotAuthenticated, function(req, res, next) {passport.authenticate('local', function(err, user, info){
+  if(err){
+    return next(err);
+  }
+  if(!user){
+    return res.send("false");
+  }
+  req.logIn(user, function(err){
+    if(err){
+      return next(err);
+    }
+    return res.send("true");
+  });
+}) (req, res, next);
+});
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
 })
-
 
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
