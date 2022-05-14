@@ -18,6 +18,7 @@ let url = "http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea227483
 function Locationpage() {
 
   const [weather, setWeather] = useState([{}]);
+  const [username, setUser] = useState({});
 
     useEffect(() => {
         axios.get(url)
@@ -25,6 +26,13 @@ function Locationpage() {
         setWeather(response.data);
         });
         }, []);
+      
+    useEffect(() => {
+        axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
+        setUser(response.data);
+        });
+        }, []);
+
   try{
     console.log(weather.location.name)
     function logout(){
@@ -47,13 +55,22 @@ function Locationpage() {
         <div className='banner-right'>
 
           <div id='icon'><Fa.FaUserCircle/></div>
-          <div id='text'>Username</div>
+          <div id='text' style={{width:"4vw"}}><Name/></div>
           <div id='vertical-line'></div>
           <div id='icon'><Bs.BsFillBookmarkHeartFill/></div>
-          <div id='text'>Favourite</div>
+          <div id='text' onClick={()=>{window.location.pathname="/favourite/"+username.username}}>Favourite</div>
           <div id='vertical-line'></div>
           <div id='icon'><Md.MdLogout/></div>
-          <div id='text'><a onClick={() => logout()}>Logout</a></div>
+          <div id='text' onClick={()=>{
+          axios
+          .delete("http://localhost:8000/api/logout", {withCredentials:true})
+          .then((res) => {
+            window.location.pathname="/";
+          })
+          .catch((err) => {
+              alert(err);
+          })
+        }}>Logout</div>
 
         </div>
       </div>
@@ -62,9 +79,9 @@ function Locationpage() {
         <h1 className='text-center'>{loc}</h1>
 
         <SimpleMap location={weather.location}/>
-        <hr></hr>
+        <hr className="p-5"></hr>
         <LocationInfo data={weather}></LocationInfo>
-        <hr></hr>
+        <hr className="p-5"></hr>
         <CommentArea></CommentArea>
       </div>
       </>
@@ -100,7 +117,6 @@ class LocationInfo extends Component {
     return (
       <>
         <h1 className="text-center">Location Information</h1>
-        <p>Last updated at {this.props.data.current.last_updated}</p>
         <Table striped bordered hover>
           <thead>
               <tr>
@@ -196,7 +212,7 @@ function CommentArea() {
           <>
           <div id={"comment" + comment.comment_id}>
             <h4>User: {comment.user_id}</h4>
-            <p>Content: {comment.content} {comment.comment_id}</p>
+            <p>Content: {comment.content}</p>
             {comment.user_id == username ? <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id, username)}>Delete Comment</Button> : ""}
             <hr></hr>
           </div>
@@ -218,7 +234,6 @@ function addComment(user_id) {
       return;
   } else {
     let comment = document.getElementById("commentBox").value;
-    let userid = "1652433391076";
     console.log(user_id, comment);
   
   let bodytext = "user_id=" + user_id + "&content=" + comment;
@@ -240,7 +255,7 @@ function addComment(user_id) {
           let newComment = 
           "<div id='comment" + data.comment_id + "'>" +
             "<h4>User: " + data.user_id + "</h4>" + 
-            "<p>Content: " + data.content + " " + data.comment_id + "</p>" + 
+            "<p>Content: " + data.content + "</p>" + 
             "<button type='button' id='" + data.comment_id + "' class='btn btn-primary'>Delete Comment</Button>" +
             "<hr></hr>" +
           "</div>"
@@ -274,6 +289,26 @@ function Comment() {
   }catch(e){
     return("Error occur" + e)
   }
+}
+
+function Name(){
+    
+  const [items, setItems] = useState({});
+
+  useEffect(() => {
+      axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
+      setItems(response.data);
+      });
+  }, []);
+  try{
+   return(
+           <>
+           {items.username}
+           </>
+   )
+   }catch(e){
+     return("error")
+   }
 }
 
 export default Locationpage
