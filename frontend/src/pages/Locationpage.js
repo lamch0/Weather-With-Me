@@ -14,6 +14,7 @@ import axios from "axios";
 let loc = window.location.href.replace("http://localhost:3000/Singlelocation/", "").replace("%20", " ");
 let url = "http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + loc + "&aqi=no";
 
+
 function Locationpage() {
 
   const [weather, setWeather] = useState([{}]);
@@ -26,6 +27,16 @@ function Locationpage() {
         }, []);
   try{
     console.log(weather.location.name)
+    function logout(){
+      axios
+        .delete("http://localhost:8000/api/logout", {withCredentials:true})
+        .then((res) => {
+            window.location.reload(false);
+        })
+        .catch((err) => {
+            alert(err);
+      })
+    }
     return (
       <>
       <div className='banner'>
@@ -42,7 +53,7 @@ function Locationpage() {
           <div id='text'>Favourite</div>
           <div id='vertical-line'></div>
           <div id='icon'><Md.MdLogout/></div>
-          <div id='text'>Logout</div>
+          <div id='text'><a onClick={() => logout()}>Logout</a></div>
 
         </div>
       </div>
@@ -139,9 +150,9 @@ class LocationInfo extends Component {
   }
 }
 
-function deleteComment(commentId) {
+function deleteComment(commentId, user_id) {
 
-  fetch("http://localhost:8000/api/comments/delete/" + loc + "/" + commentId + "/1652344369760", {
+  fetch("http://localhost:8000/api/comments/delete/" + loc + "/" + commentId + "/" + user_id, {
       method: "DELETE"
     })
       .then(() => {
@@ -158,6 +169,7 @@ function deleteComment(commentId) {
 function CommentArea() {
 
     const [comments, setComment] = useState([]);
+    const [username, setUser] = useState({});
     
     useEffect(() => {
       axios.get("http://localhost:8000/api/location/getcomment/name?name=" + loc)
@@ -166,10 +178,14 @@ function CommentArea() {
       })
     }, []);
 
+    useEffect(() => {
+      axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
+      setUser(response.data);
+      });
+    }, []);
+
     try{
       console.log("comment: " + comments)
-
-    let userid = "1652344369760";
     
     return (
       <>
@@ -180,7 +196,7 @@ function CommentArea() {
           <div id={"comment" + comment.comment_id}>
             <h4>User: {comment.user_id}</h4>
             <p>Content: {comment.content} {comment.comment_id}</p>
-            {comment.user_id == userid ? <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id)}>Delete Comment</Button> : ""}
+            {comment.user_id == username ? <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id, username)}>Delete Comment</Button> : ""}
             <hr></hr>
           </div>
         </>)}
@@ -194,18 +210,17 @@ function CommentArea() {
   }
 }
 
-function addComment() {
-
+function addComment(user_id) {
+  
   if(document.getElementById("commentBox").value == ""){
       alert("Please Enter Comment");
       return;
   } else {
     let comment = document.getElementById("commentBox").value;
-    let userid = "1652344369760";
-    console.log(userid, comment);
+    let userid = "1652433391076";
+    console.log(user_id, comment);
   
-  
-  let bodytext = "user_id=" + userid + "&content=" + comment;
+  let bodytext = "user_id=" + user_id + "&content=" + comment;
 
   fetch("http://localhost:8000/api/comments/" + loc, {
       method: "POST",
@@ -239,12 +254,25 @@ function addComment() {
 }
 
 function Comment() {
-  return (
-    <>
-      <textarea className="w-100" id="commentBox"></textarea>
-      <Button onClick={addComment.bind(this)}>Add Comment</Button>
-    </>
-  )
+  const [username, setUser] = useState({});
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
+    setUser(response.data);
+    });
+  }, []);
+
+  try{
+    console.log(username)
+    return (
+      <>
+        <textarea className="w-100" id="commentBox"></textarea>
+        <Button onClick={addComment.bind(this, username)}>Add Comment</Button>
+      </>
+    )
+  }catch(e){
+    return("Error occur" + e)
+  }
 }
 
 export default Locationpage
