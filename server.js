@@ -59,7 +59,7 @@ app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: 10,
   resave: false,
   saveUninitialized: false,
   name: "userInSession"
@@ -71,16 +71,16 @@ app.use(methodOverride('_method'))
 
 // when logged in, check user type
 app.get('/', checkAuthenticated, (req, res) => {
-  if (req.session.passport.user){
-    console.log('logged in to ' + req.session.passport.user)
-  }
-  if (user == 'admin'){
-    res.send("admin")//.render('profile.ejs', { username: "Admin account" })
-  }
-  else {
-    res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
-  }
-  // res.render('profile.ejs', { username: req.session.passport.user })
+  // if (req.session.passport.user){
+  //   console.log('logged in to ' + req.session.passport.user)
+  // }
+  // if (user == 'admin'){
+  //   res.send("admin")//.render('profile.ejs', { username: "Admin account" })
+  // }
+  // else {
+  //   res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
+  // }
+  res.render('profile.ejs', { username: req.session.passport.user })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -181,10 +181,7 @@ app.post("/api/comments/:name",(req,res)=> {
                           else{
                             loc.comments.push(fcom._id);
                             await loc.save();
-                            res.status(201).send("{<br>"+
-                            '"comment_id": ' + fcom.comment_id + ",<br>"+
-                            '"user_id": <br>{<br>"user_id": '+ fcom.user_id +',<br>}<br>'
-                            +'"content": '+fcom.content + "<br>}<br>");
+                            res.status(201).send(fcom);
                           }
                       })
                     }
@@ -224,7 +221,7 @@ app.delete("/api/comments/delete/:name/:comment_id/:user_id",(req,res)=>{
               loc.comments.splice(index, 1)
             }
             await loc.save()
-            Comment.deleteOne({comment_id: req.params['comment_id']},(err, e)=>{
+            Comment.deleteOne({comment_id: req.params['comment_id']},(err,e)=>{
               if(err)
               {res.send(err)}
               else{
@@ -239,6 +236,18 @@ app.delete("/api/comments/delete/:name/:comment_id/:user_id",(req,res)=>{
   })
 })
 // ============================== End of Delete comment section ========================================
+// Get location comment list
+app.get('/api/location/getcomment/?name', (req, res) => {
+    Location.findOne({ name: req.query["name"] })
+    .populate("comments")
+    .exec(function (err, loc) {
+        if (err)
+            res.send(err);
+        else 
+            res.send(loc.comments);
+    });
+  });
+// ============================== End of Get comment section ========================================
 //Create Location (admin side)
 app.post("/api/location",(req,res)=>{
   var new_location_id;
@@ -543,7 +552,7 @@ app.delete("/api/user/delete/:user_id", (req, res) => {
 
 // Get one location by name in JSON eg'/location/name?name=Tokyo'
 app.get('/api/location/get/name?', (req, res) => {
-  // console.log("getting location by name")
+  console.log("getting location by name")
   Location.findOne(
     { name: req.query["name"] }, (err, loc) => {
         if (err)
@@ -576,39 +585,53 @@ app.get('/api/location/get/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-// Add location to fav_loc list of user, eg '/favourite/ryan/10'
-app.put('/api/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
+// Add location to fav_loc list of user, eg '/api/favourite/ryan/10'
+app.put('/api/favourite/:username/:loc_id', (req, res) => {
   // User.find({ username: req.session.passport.user }, (err, user) => {
   // console.log(req.params)
-  User.findOne({ username: req.params.username }, async (err, user) => {
+  User.findOne({ username: req.params.username }, (err, user) => {
     if (err)
-      res.send('Error: cannot find user')
+      res.send(Err)
     else if (!user)
       res.send('No such user')
     else {
       console.log(user)
-      if (!user.fav_loc.includes(req.params.loc_id)){
-        user.fav_loc.push(req.params.loc_id)
-        await user.save()
-      }
-      // console.log(user)
-      res.send(user)
+      Location.findOne({loc_id: req.params.loc_id}, async (err, loc) => {
+        if (err)
+          res.send(err)
+        else {
+          if (!user.fav_loc.includes(loc._id)){
+            user.fav_loc.push(loc._id)
+            await user.save()
+          }
+          console.log(user)
+          res.send(user)
+        }
+      })
     }
   })
 })
 
-// Get list of fav_loc of one user
-app.get('/api/favourite', (req, res)=> {
-  User.findOne({username: req.session.passport.user}, (err, e)=> {
+// Get list of fav_loc of one user  eg '/api/favourite/ryan'
+app.get('/api/favourite/:username', (req, res)=> {
+  // User.findOne({username: req.session.passport.user}, (err, e)=> {
+  //   if (err)
+  //     res.send(err)
+  //   else {
+  //    res.send(e.fav_loc)
+  //   }
+  // })
+  User.findOne({username: req.params.username})
+  .populate("fav_loc")
+  .exec(function (err, user) {
     if (err)
       res.send(err)
-    else {
-     res.send(e.fav_loc)
-    }
+    else
+      res.send(user.fav_loc)
   })
 })
 
-// Delete loc from fav_loc 
+// Delete loc from fav_loc  eg '/api/favourite/delete/ryan/1'
 app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
   User.findOne({ username: req.params.username }, async (err, user) => {
     if (err)
@@ -616,14 +639,20 @@ app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
     else if (!user)
       res.send('No such user')
     else {
-      console.log("Old user: "+user)
-      const index = user.fav_loc.indexOf(req.params.loc_id)
-      if (index > -1){
-        user.fav_loc.splice(index, 1)
-      }
-      console.log("New user: "+user)
-      await user.save()
-      res.send(user)
+      // console.log(user)
+      Location.findOne({ loc_id: req.params.loc_id }, async (err, loc) => {
+        if (err)
+          res.send(err)
+        else {
+          const index = user.fav_loc.indexOf(loc._id)
+          if (index > -1){
+            user.fav_loc.splice(index, 1)
+          }
+          // console.log(user)
+          await user.save()
+          res.send(user)
+        }
+      })
     }
   })
 })
@@ -643,7 +672,6 @@ app.get('/api/userloggedin', (req, res) => {
   else res.send(undefined)
   
 })
-
 // app.get('/userloggedin/:usename',  (req, res) => {
 //   console.log(req.params.username)
 //   User.findOne({usename: req.params.username},  (err, user) => {
@@ -655,16 +683,5 @@ app.get('/api/userloggedin', (req, res) => {
 //     }
 //   })
 // })
-
-app.get('/api/location/getcomment/?name', (req, res) => {
-    Location.findOne({ name: req.query["name"] })
-    .populate("comments")
-    .exec(function (err, loc) {
-        if (err)
-            res.send(err);
-        else 
-            res.send(loc.comments);
-    });
-  });
 
 app.listen(8000)
