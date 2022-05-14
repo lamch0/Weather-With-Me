@@ -100,6 +100,7 @@ class LocationInfo extends Component {
     return (
       <>
         <h1 className="text-center">Location Information</h1>
+        <p>Last updated at {this.props.data.current.last_updated}</p>
         <Table striped bordered hover>
           <thead>
               <tr>
