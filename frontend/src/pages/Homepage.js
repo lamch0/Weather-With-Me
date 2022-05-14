@@ -7,7 +7,7 @@ import * as Bs from "react-icons/bs";
 import * as Bi from "react-icons/bi";
 import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
-import pin from "../components/pin2.png";
+import pin from "../components/pin.png";
 import { Table, Button } from 'react-bootstrap';
 import axios from "axios";
 
@@ -263,7 +263,11 @@ function Location_Table(props){
               <td>{item.lon}</td>
 
               <td><Button onClick={() => { window.location.pathname = '/Singlelocation/'+ item.name; } } >View Details</Button></td>
-              <td><Button onClick={()=>{axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})}}>Add</Button></td>
+              <td><Button onClick={()=>{
+                  axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})
+                    .then((res)=>{
+                      console.log((res));
+                    })}}>Add</Button></td>
             </tr>
           </tbody>
           );

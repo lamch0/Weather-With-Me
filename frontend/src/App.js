@@ -39,6 +39,11 @@ function App() {
             let password = document.getElementById("password").value;
             let bodytext = "username=" + username + "&password=" + password;
 
+            if(username.length < 4 || username.length > 20 || password.length < 4 || password.lenghtn > 20){
+                alert("Size of sername and password should be smaller than 4 and not longer than 20.")
+                return;
+            }
+
             let payload = {username : username, password: password}
             axios
                 .post("http://localhost:8000/login/", bodytext, {withCredentials:true})
