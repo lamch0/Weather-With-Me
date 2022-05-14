@@ -132,7 +132,7 @@ app.delete('/logout', (req, res) => {
   res.redirect('/login')
 })
 // Create Comment (user side)
-app.post("/comments/:name",(req,res)=> {
+app.post("/api/comments/:name",(req,res)=> {
   var new_comment_id;
   Comment.find().
   sort({comment_id: -1})
@@ -196,7 +196,7 @@ app.post("/comments/:name",(req,res)=> {
 })
 // ============================== End of Create comment section ========================================
 //Delete Comment (user side)
-app.delete("/comments/delete/:name/:comment_id",(req,res)=>{
+app.delete("/api/comments/delete/:name/:comment_id",(req,res)=>{
   Comment.findOne({comment_id: req.params['comment_id']},(err,e) =>{
     if(err)
     {res.send(err)}
