@@ -37,6 +37,7 @@ function Admin(){
                     <div id='text' onClick={()=>logout()}>Logout</div>
                 </div>
             </div>
+            <div className="margin"></div>
             <div className="admin_page">
                 <div className="title text-center">
                     <h2>Admin Site</h2>
@@ -74,7 +75,8 @@ function Update(){
         .then((res) => {
             res = JSON.parse(res);
             let inform = [];
-            for(let i = 0; i < 2; i++){
+            let x = res.length;
+            for(let i = 0; i < x; i++){
                 let check = [];
                 fetch("http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + res[i].name + "&aqi=no", {
                     method: "get"
@@ -99,7 +101,7 @@ function Update(){
                     check.push(res.current.vis_km);
                     inform.push(check);
                     
-                    if(i == 1){
+                    if(i == x - 1){
                         setState(1);
                         setInfo(inform);
                     }
@@ -331,7 +333,7 @@ function LocationUpdate(){
         let name = document.getElementById("locationname").value;
         let lat = document.getElementById("locationlat").value;
         let long = document.getElementById("locationlong").value;
-        let bodytext = "name=" + name + "&lat=" + lat + "&long=" + long;
+        let bodytext = "name=" + name + "&lat=" + lat + "&lon=" + long;
 
         fetch("http://localhost:8000/api/location", {
             method: "POST",
@@ -348,7 +350,7 @@ function LocationUpdate(){
                 document.getElementById("locationname").value = "";
                 document.getElementById("locationlat").value = "";
                 document.getElementById("locationlong").value = "";
-                console.log(res);
+                alert("Success create!")
             })
             .catch((err) => {
                 if(name == ""){
@@ -435,7 +437,7 @@ function LocationUpdate(){
                 document.getElementById("locationname").value = "";
                 document.getElementById("locationlat").value = "";
                 document.getElementById("locationlong").value = "";
-                console.log(res);
+                alert("Success update!")
             })
             .catch((err) => {
                 if(name == ""){

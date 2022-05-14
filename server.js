@@ -143,12 +143,12 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
 })
 
 // Logging out from the session
-app.delete('/logout', (req, res) => {
+app.delete('/api/logout', (req, res) => {
   req.session.destroy(() => {
     console.log('session destroyed')
   })
   req.logOut()
-  res.redirect('/login')
+  res.send("{'result':true}");
 })
 // Create Comment (user side)
 app.post("/api/comments/:name",(req,res)=> {
