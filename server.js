@@ -215,7 +215,7 @@ app.post("/api/comments/:name",(req,res)=> {
 })
 // ============================== End of Create comment section ========================================
 //Delete Comment (user side)
-app.delete("/api/comments/delete/:name/:comment_id",(req,res)=>{
+app.delete("/api/comments/delete/:name/:comment_id/:user_id",(req,res)=>{
   Comment.findOne({comment_id: req.params['comment_id']},(err,e) =>{
     if(err)
     {res.send(err)}
@@ -226,7 +226,7 @@ app.delete("/api/comments/delete/:name/:comment_id",(req,res)=>{
         res.status(404).send("Could not delete it because the comment ID is not exist.");
       }
       else{
-        if(e.user_id != req.body['user_id']){
+        if(e.user_id != req.params['user_id']){
           res.set('Content-Type','text/plain');
           res.status(404).send("Could not delete it because you are not the owner of the comment.");
         }
