@@ -256,7 +256,7 @@ function Location_Table(props){
             <th id="table_title" onClick={()=>sorting_int("lon")}>Longitude &nbsp;{Sort_icon2()}</th>
 
             <th id="table_title1" style={{width:"6vw"}}>Weather Information</th>
-            <th id="table_title1" style={{width:"6vw"}}> Delete Favourite</th>
+            
           </tr>
         </thead>
         {matchData.map((item) => {
@@ -269,7 +269,7 @@ function Location_Table(props){
               <td>{item.lon}</td>
 
               <td><Button onClick={() => { window.location.pathname = '/Singlelocation/'+ item.name; } } >View Details</Button></td>
-              <td><Button onClick={()=>{axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})}}>Delete</Button></td>
+           
             </tr>
           </tbody>
           );
