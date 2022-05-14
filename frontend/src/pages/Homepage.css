@@ -7,12 +7,17 @@
     color: white;
     display: flex;
     margin-bottom: 6vh;
+    position: fixed;
+    z-index: 1;
 }
 .banner #title{
     font-size: 3vw;
     padding-top: 1vh;
     padding-left: 0.7vw;
 
+}
+.banner #title:hover{
+    cursor: pointer;
 }
 .banner #icon{
     font-size: 3.3vw;
@@ -27,12 +32,14 @@
     font-size: 1.3vw;
     padding-left: 0.7vw;
     padding-top: 3.7vh;
+    
 }
 
 .banner-right #text{
     font-size: 1.1vw;
     padding-top: 3.8vh;
     padding-left: 0.5vw;
+    text-align: center;
 }
 .banner-right #text:hover{
     cursor: pointer;
@@ -66,15 +73,20 @@
 }
 
 .search #bar{
-    width: 34.379028792436614vw;
+    width: 20.379028792436614vw;
     height: 4vh;
     border-radius: 0.42973785990545765vw;
     font-size: 0.8594757198109153vw;
 }
 .search #icon{
-    padding-top: 0.42973785990545765vw;
+
     padding-right: 0.6446067898581865vw;
     font-size: 1.7189514396218306vw;
+}
+.search #button{
+    width: 5vw;
+    height: 4vh;
+    margin-left: 1vw;
 }
 
 #search_field{
@@ -91,11 +103,36 @@
     left: 50%;
     transform: translate(-50%, -100%);
 }
+#pin:hover{
+    cursor: pointer;
+}
 
 #table_title{
     background-color: #89C4F4;
+    user-select: none;
     cursor: pointer;
 }
 #table_title:hover{
     background-color: #4B77BE;
+}
+
+.margin{
+    height: 14vh;
+}
+#table_title1{
+    background-color: #22A7F0;
+
+}
+th{
+    text-align: center;
+    justify-content: center;
+
+}
+td{
+    text-align: center;
+    justify-content: center;
+}
+.location_table{
+    margin-left: 19vw;
+    margin-right: 19vw;
 }
