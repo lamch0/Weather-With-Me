@@ -71,16 +71,16 @@ app.use(methodOverride('_method'))
 
 // when logged in, check user type
 app.get('/', checkAuthenticated, (req, res) => {
-  if (req.session.passport.user){
-    console.log('logged in to ' + req.session.passport.user)
-  }
-  if (user == 'admin'){
-    res.send("admin")//.render('profile.ejs', { username: "Admin account" })
-  }
-  else {
-    res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
-  }
-  // res.render('profile.ejs', { username: req.session.passport.user })
+  // if (req.session.passport.user){
+  //   console.log('logged in to ' + req.session.passport.user)
+  // }
+  // if (user == 'admin'){
+  //   res.send("admin")//.render('profile.ejs', { username: "Admin account" })
+  // }
+  // else {
+  //   res.send("user")//.render('profile.ejs', { username: req.session.passport.user })
+  // }
+  res.render('profile.ejs', { username: req.session.passport.user })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -577,7 +577,7 @@ app.get('/api/location/get/id?', (req, res) => {
 //===========================End Get one location part=====================================
 
 // Add location to fav_loc list of user, eg '/favourite/ryan/10'
-app.put('/api/favourite/:username/:loc_id', checkAuthenticated, (req, res) => {
+app.put('/api/favourite/:username/:loc_id', (req, res) => {
   // User.find({ username: req.session.passport.user }, (err, user) => {
   // console.log(req.params)
   User.findOne({ username: req.params.username }, async (err, user) => {
