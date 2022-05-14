@@ -7,14 +7,21 @@ import * as Bs from "react-icons/bs";
 import * as Bi from "react-icons/bi";
 import * as Md from "react-icons/md";
 import GoogleMapReact from 'google-map-react';
-import pin from "../components/pin.png";
+import pin from "../components/pin2.png";
 import { Table, Button } from 'react-bootstrap';
 import axios from "axios";
 
 function Homepage() {
 
   const [items, setItems] = useState([{}]);
+  const [username, setUser] = useState({});
 
+  
+    useEffect(() => {
+        axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
+        setUser(response.data);
+        });
+    }, []);
 
     useEffect(() => {
         axios.get("http://localhost:8000/api/locations").then((response) => {
@@ -39,7 +46,7 @@ function Homepage() {
         <div id='text' style={{width:"4vw"}}><Name/></div>
         <div id='vertical-line'></div>
         <div id='icon'><Bs.BsFillBookmarkHeartFill/></div>
-        <div id='text'>Favourite</div>
+        <div id='text' onClick={()=>{window.location.pathname="/favourite/"+username.username}}>Favourite</div>
         <div id='vertical-line'></div>
         <div id='icon'><Md.MdLogout/></div>
         <div id='text'>Logout</div>
@@ -263,11 +270,7 @@ function Location_Table(props){
               <td>{item.lon}</td>
 
               <td><Button onClick={() => { window.location.pathname = '/Singlelocation/'+ item.name; } } >View Details</Button></td>
-              <td><Button onClick={()=>{
-                  axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})
-                    .then((res)=>{
-                      console.log((res));
-                    })}}>Add</Button></td>
+              <td><Button onClick={()=>{axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})}}>Add</Button></td>
             </tr>
           </tbody>
           );
@@ -286,7 +289,6 @@ function Name(){
     
   const [items, setItems] = useState({});
 
-  
   useEffect(() => {
       axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
       setItems(response.data);
