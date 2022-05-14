@@ -610,7 +610,7 @@ app.put('/api/favourite/:username/:loc_id', (req, res) => {
   // console.log(req.params)
   User.findOne({ username: req.params.username }, (err, user) => {
     if (err)
-      res.send(Err)
+      res.send(err)
     else if (!user)
       res.send('No such user')
     else {
