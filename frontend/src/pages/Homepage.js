@@ -270,7 +270,10 @@ function Location_Table(props){
               <td>{item.lon}</td>
 
               <td><Button onClick={() => { window.location.pathname = '/Singlelocation/'+ item.name; } } >View Details</Button></td>
-              <td><Button onClick={()=>{axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})}}>Add</Button></td>
+              <td><Button onClick={(e)=>{
+                axios.put("http://localhost:8000/api/favourite/"+username.username+"/"+item.loc_id,{withCredentials : true})
+                .then(alert("Added to favourite location list"))
+                }}>Add</Button></td>
             </tr>
           </tbody>
           );
