@@ -263,7 +263,7 @@ function Comment() {
   }, []);
 
   try{
-    console.log(username)
+    console.log("user: " + username)
     return (
       <>
         <textarea className="w-100" id="commentBox"></textarea>
