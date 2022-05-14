@@ -102,8 +102,8 @@ function Update(){
                     inform.push(check);
                     
                     if(i == x - 1){
-                        setState(1);
                         setInfo(inform);
+                        setState(1);
                     }
                 })
             }
