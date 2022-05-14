@@ -180,7 +180,7 @@ function CommentArea() {
 
     useEffect(() => {
       axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
-      setUser(response.data);
+      setUser(response.data.user_id);
       });
     }, []);
 
@@ -258,7 +258,7 @@ function Comment() {
 
   useEffect(() => {
     axios.get("http://localhost:8000/api/userloggedin", {withCredentials : true}).then((response) => {
-    setUser(response.data);
+    setUser(response.data.user_id);
     });
   }, []);
 
