@@ -84,6 +84,7 @@ function Homepage() {
         let SearchItemsLowerCase = document.getElementById("bar").value.toLowerCase();
         setSearchItems(SearchItemsLowerCase);}
       }>Search</Button>
+
       <Button id="button" onClick={(e)=>
       {
         document.getElementById("bar").value="";
@@ -177,50 +178,49 @@ function Location_Table(props){
     else if(get_field()==="lon"){
       return items.lon.toString().includes(props.input);
     }
+  })
 
-})
-
-  const [order, setorder]=useState("ASC")
-  const sorting_char=(col)=>{
+  const [order, setorder]=useState("asc")
+  function sorting_char(column){
     setselectedname(1);
     setselectedlat(0);
     setselectedlon(0);
-    if (order==="ASC"){
-      const sorted=[...location].sort((a,b)=>a[col].toLowerCase()>b[col].toLowerCase()? 1:-1);
-      setlocation(sorted);
-      setorder("DSC");
+    if (order==="asc"){
+      let location_sorted=[...location].sort((a,b)=>a[column].toLowerCase()>b[column].toLowerCase()? 1:-1);
+      setlocation(location_sorted);
+      setorder("desc");
     }
-    if (order==="DSC"){
-      const sorted=[...location].sort((a,b)=>a[col].toLowerCase()<b[col].toLowerCase()? 1:-1);
-      setlocation(sorted);
-      setorder("ASC");
+    if (order==="desc"){
+      let location_sorted=[...location].sort((a,b)=>a[column].toLowerCase()<b[column].toLowerCase()? 1:-1);
+      setlocation(location_sorted);
+      setorder("asc");
     }
   }
-  const sorting_int=(col)=>{
+  function sorting_int(column){
     setselectedname(0);
-    if(col=="lat"){
+    if(column=="lat"){
       setselectedlat(1);
       setselectedlon(0);
     }
-    if(col=="lon"){
+    if(column=="lon"){
       setselectedlat(0);
       setselectedlon(1);
     }
-    if (order==="ASC"){
-      const sorted=[...location].sort((a,b)=>a[col]-b[col]);
-      setlocation(sorted);
-      setorder("DSC");
+    if (order==="asc"){
+      let location_sorted=[...location].sort((a,b)=>a[column]-b[column]);
+      setlocation(location_sorted);
+      setorder("desc");
     }
-    if (order==="DSC"){
-      const sorted=[...location].sort((a,b)=>b[col]-a[col]);
-      setlocation(sorted);
-      setorder("ASC");
+    if (order==="desc"){
+      let location_sorted=[...location].sort((a,b)=>b[column]-a[column]);
+      setlocation(location_sorted);
+      setorder("asc");
     }
   }
 
     function Sort_icon(){
       if (selected_name===1){
-          if (order=="ASC"){
+          if (order=="asc"){
             return(<Bi.BiSortZA/>)
           }else{
             return(<Bi.BiSortAZ/>)
@@ -231,7 +231,7 @@ function Location_Table(props){
     }
     function Sort_icon1(){
       if (selected_lat===1){
-          if (order=="ASC"){
+          if (order=="asc"){
             return(<Bs.BsSortNumericUp/>)
           }else{
             return(<Bs.BsSortNumericDown/>)
@@ -242,7 +242,7 @@ function Location_Table(props){
     }
     function Sort_icon2(){
       if (selected_lon===1){
-          if (order=="ASC"){
+          if (order=="asc"){
             return(<Bs.BsSortNumericUp/>)
           }else{
             return(<Bs.BsSortNumericDown/>)
