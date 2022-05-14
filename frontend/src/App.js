@@ -2,6 +2,7 @@ import React from 'react'
 import "./App.css"
 import Homepage from './pages/Homepage.js'
 import Admin from './pages/Adminsite.js'
+import Request from './pages/Adminsite.js'
 import Locationpage from './pages/Locationpage.js'
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import * as Ti from "react-icons/ti";
@@ -9,22 +10,26 @@ import  {useEffect, useState} from "react"
 import axios from "axios";
 
 function App() {
+    const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState(0);
 
     useEffect(() => {
-        console.log("useEffect")
-        // fetch("http://localhost:8000/api/userloggedin", {
-        //     method: "GET"
-        // })
-        // .then((res) => res.text(res))
-        // .then((res) => {console.log(res)})
-
         axios
             .get("http://localhost:8000/api/userloggedin" , {withCredentials:true})
             .then((res) => {
-                console.log(res.data)
+                if(res.data == ""){
+                    setStatus(0);
+                    setLoading(true);
+                }
+                if(res.data.user_type == "user"){
+                    setStatus(1);
+                    setLoading(true);
+                }
+                if(res.data.user_type == "admin"){
+                    setStatus(2);
+                    setLoading(true);
+                }
             })
-        
     }, [])
 
     function Loginpage() {
@@ -34,20 +39,34 @@ function App() {
             let password = document.getElementById("password").value;
             let bodytext = "username=" + username + "&password=" + password;
 
-            fetch("http://localhost:8000/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded"},
-                headers: { "Access-Control-Allow-Origin": "*"},
-                headers: { "Access-Control-Allow-Credentials": "*"},
-                body: bodytext})
+            let payload = {username : username, password: password}
+            axios
+                .post("http://localhost:8000/login/", bodytext, {withCredentials:true})
                 .then((res) => {
-                    return res.text(res);
+                    if(res.data == false){
+                        alert("Incorrect username or password!");
+                    }else{
+                        axios
+                            .get("http://localhost:8000/api/userloggedin" , {withCredentials:true})
+                            .then((res) => {
+                                if(res.data == ""){
+                                    setStatus(0);
+                                    setLoading(true);
+                                }
+                                if(res.data.user_type == "user"){
+                                    setStatus(1);
+                                    setLoading(true);
+                                }
+                                if(res.data.user_type == "admin"){
+                                    setStatus(2);
+                                    setLoading(true);
+                                }
+                            })
+                    }
                 })
-                .then((res) => {
-                    console.log((res));
-                })
+                
         }
-    
+        
         return (
             <section className="loginpage">
                 <div className="container fadeInDown">
@@ -69,7 +88,7 @@ function App() {
                                     <input type="password" name="password" id="password" placeholder="password" className="form-control" />
                                 </div>
                                 <div className="login-btn">
-                                    <button type="submit" className="btn btn-outline-primary" onClick={()=>login()}>Login</button>
+                                    <button type="button" className="btn btn-outline-primary" onClick={()=>login()}>Login</button>
                                 </div>
                             </form>
                         </div>
@@ -79,22 +98,59 @@ function App() {
         )
     } 
 
-    return (
-        <>
-        <div className='App'>
-            <Router>
-            <Routes>
-            <Route path='/login' element={<Loginpage/>} />
-            
-            <Route path='/home' element={<Homepage/>} />
-            <Route path='/Singlelocation/:location' element={<Locationpage/>} />
+    if(!loading){
+        return (<></>)
+    }
 
-            <Route path='/admin' element={<Admin/>} />
-            </Routes>
-            </Router>
-            </div>
-        </>
-    );
+    if(loading && status == 0){
+        return (
+            <>
+            <div className='App'>
+                <Router>
+                <Routes>
+                    
+                <Route path='/' element={<Loginpage/>} />
+    
+                </Routes>
+                </Router>
+                </div>
+            </>
+        );
+    }
+
+    if(loading && status == 1){
+        return (
+            <>
+            <div className='App'>
+                <Router>
+                <Routes>
+                    
+                <Route path='/' element={<Homepage/>} />
+                <Route path='/Singlelocation/:location' element={<Locationpage/>} />
+    
+                </Routes>
+                </Router>
+                </div>
+            </>
+        );
+    }
+
+    if(loading && status == 2){
+        return (
+            <>
+            <div className='App'>
+                <Router>
+                <Routes>
+
+                <Route path='/' element={<Admin/>} />
+
+                </Routes>
+                </Router>
+                </div>
+            </>
+        );
+    }
+    
 }
 
 export default App

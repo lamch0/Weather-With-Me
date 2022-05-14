@@ -6,8 +6,34 @@ import locationimg from "../components/location.png"
 import weatherapiimg from "../components/weatherapi.png"
 import {useState} from "react"
 import './Adminsite.css'
+import axios from "axios";
+
 
 function Admin(){
+    const [table, setTable] = useState(0);
+    // let location = [];
+    // let lat = [];
+    // let long = [];
+    // let localtime = [];
+    // let temp_c = [];
+    // let wind_kph = [];
+    // let wind_dir = [];
+    // let humidity = [];
+    // let precip_mm = [];
+    // let vis_km = [];
+    let info = [];
+
+    function logout(){
+        axios
+            .delete("http://localhost:8000/api/logout", {withCredentials:true})
+            .then((res) => {
+                window.location.reload(false);
+            })
+            .catch((err) => {
+                alert(err);
+            })
+    }
+
     return(
         <>
             <div className='banner'>
@@ -18,7 +44,7 @@ function Admin(){
                     <div id='text'>Admin</div>
                     <div id='vertical-line'></div>
                     <div id='icon'><Md.MdLogout/></div>
-                    <div id='text'>Logout</div>
+                    <div id='text' onClick={()=>logout()}>Logout</div>
                 </div>
             </div>
             <div className="admin_page">
@@ -37,28 +63,101 @@ function Admin(){
                         <UserUpdate/>
                     </div>
                 </div>
+                {table == 1 && 
+                <div className="table">
+                    <table>
+                        <tr>
+                            <td>Name</td>
+                            <td>Latitude</td>
+                            <td>Longitude</td>
+                            <td>Local Time</td>
+                            <td>Temp_c</td>
+                            <td>Wind KPH</td>
+                            <td>Wind DIR</td>
+                            <td>Humidity</td>
+                            <td>Precip_mm</td>
+                            <td>Vis_km</td>
+                        </tr>
+                        {info.map((index, element) =>  {
+                            {console.log(element)}
+                            <tr>
+                            <td>{element[0]}</td>
+                            <td>{element[1]}</td>
+                            <td>{element[2]}</td>
+                            <td>{element[3]}</td>
+                            <td>{element[4]}</td>
+                            <td>{element[5]}</td>
+                            <td>{element[6]}</td>
+                            <td>{element[7]}</td>
+                            <td>{element[8]}</td>
+                            <td>{element[9]}</td>
+                            </tr>
+                        })}
+                    </table>
+                </div>
+                }
             </div>
         </>
     )
-}
-export default Admin;
+
 
 
 
 function Update(){
     const [state, setState] = useState(0);
 
-    function refresh(){
 
+    function refresh(){
+        setState(0);
+        fetch("http://localhost:8000/api/locations", {
+            method: "GET"
+        })
+        .then((res) => {
+            return res.text(res);
+        })
+        .then((res) => {
+            res = JSON.parse(res);
+            for(let i = 0; i < 2; i++){
+                let check = [];
+                fetch("http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + res[i].name + "&aqi=no", {
+                    method: "get"
+                })
+                .then((res) => {
+                    if(!res.ok){
+                        throw "Error"
+                    }
+                    return res.text(res);
+                })
+                .then((res) => {
+                    res = JSON.parse(res);
+                    check.push(res.location.name);
+                    check.push(res.location.lat);
+                    check.push(res.location.lon);
+                    check.push(res.location.localtime);
+                    check.push(res.current.temp_c);
+                    check.push(res.current.wind_kph);
+                    check.push(res.current.wind_dir);
+                    check.push(res.current.humidity);
+                    check.push(res.current.precip_mm);
+                    check.push(res.current.vis_km);
+                    info.push(check);
+                    setTable(1);
+                    if(i == res.length-1){
+                        setState(1);
+                        setTable(1);
+                    }
+                })
+            }
+        })
     }
 
     return(
         <div className="card">
             <img src={weatherapiimg} className="card-img-top" alt="User image" />
             <div className="card-body">
-                <h5 className="card-title">Refresh Data</h5>
-                <p className="card-text">Fetch all the data from weatherapi and refresh the database</p>
-                <button className="btn btn-primary" onClick={refresh()}>Refresh</button>
+                <h5 className="card-title">Request Data</h5>
+                <p className="card-text">Fetch all the data from weatherapi</p>
+                <button className="btn btn-primary" onClick={()=>refresh()}>Request</button>
                 {state==1 && <span className="update-span">Done !</span>}
             </div>
         </div>
@@ -70,6 +169,7 @@ function Update(){
 function UserUpdate(){
 
     function createUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
         document.querySelector("#username").classList.remove("isinvalid");
         document.querySelector("#password").classList.remove("isinvalid");
 
@@ -94,19 +194,137 @@ function UserUpdate(){
             body: bodytext
         })
         .then((res) => {
-            console.log(res);
+            if(!res.ok){
+                throw res.text(res);
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            alert("Success create! " + res);
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
         })
     }
 
     function retrieveUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let userid = document.getElementById("userid").value;
+        if(userid == ""){
+            alert("User id cannot be blank.")
+            document.querySelector("#userid").classList.add("isinvalid");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/" + userid, {
+            method: "GET"
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res)
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            res = JSON.parse(res);
+            document.querySelector("#username").value = res.username;
+            document.querySelector("#password").value = res.password;
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
     }
 
     function updateUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
 
+        let userid = document.getElementById("userid").value;
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let textbody = "updatedname=" + username + "&updatedpassword=" + password;
+
+        if(userid == ""){
+            document.querySelector("#userid").classList.add("isinvalid");
+        }
+        if(username == ""){
+            document.querySelector("#username").classList.add("isinvalid");
+        }
+        if(password == ""){
+            document.querySelector("#password").classList.add("isinvalid");
+        }
+        if(userid == "" || username == "" || password == ""){
+            alert("User id, username and password cannot be blank");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/update/" + userid, {
+            method: "PUT",
+            headers: { "Content-Type": "application/x-www-form-urlencoded"},
+            body: textbody
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res);
+            }
+            return res.text(res)
+        })
+        .then((res) => {
+            alert("Success update! " + res);
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
     }
 
     function deleteUser(){
+        document.querySelector("#userid").classList.remove("isinvalid");
+        document.querySelector("#username").classList.remove("isinvalid");
+        document.querySelector("#password").classList.remove("isinvalid");
+
+        let userid = document.getElementById("userid").value;
+        if(userid == ""){
+            document.querySelector("#userid").classList.add("isinvalid");
+            alert("User id cannot be blank");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/user/delete/" + userid, {
+            method: "Delete"
+        })
+        .then((res) => {
+            if(!res.ok){
+                throw res.text(res)
+            }
+            return res.text(res);
+        })
+        .then((res) => {
+            alert("Success delete! ");
+            document.getElementById("userid").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        })
+        .catch((err) => {
+            err.then((err) => {
+                alert(err);
+            })
+        })
 
     }
 
@@ -355,3 +573,6 @@ function LocationUpdate(){
         </div>
     )
 }
+
+}
+export default Admin;

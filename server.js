@@ -69,33 +69,49 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 
 
-// when logged in, check user type
-app.get('/', checkAuthenticated, async (req, res) => {
-  if (req.session.passport.user){
-    const updateUser = await User.findOne({username: req.session.passport.user})
-    console.log(updateUser)
-    // console.log(updateUser)
-    if (updateUser.user_type == 'user'){
-        res.redirect("http://localhost:3000/home")
-    }
-    else if (updateUser.user_type == 'admin'){
-        // var user_image = "/uploads/user_profile_images/" + updateUser.profile_image
-        // req.flash('info', user_image)
-        res.redirect("http://localhost:3000/admin")
-    }
+// // when logged in, check user type
+// app.get('/', checkAuthenticated, async (req, res) => {
+//   if (req.session.passport.user){
+//     const updateUser = await User.findOne({username: req.session.passport.user})
+//     console.log(updateUser)
+//     // console.log(updateUser)
+//     if (updateUser.user_type == 'user'){
+//         res.redirect("http://localhost:3000/home")
+//     }
+//     else if (updateUser.user_type == 'admin'){
+//         // var user_image = "/uploads/user_profile_images/" + updateUser.profile_image
+//         // req.flash('info', user_image)
+//         res.redirect("http://localhost:3000/home")
+//     }
+//   }
+//   // res.render('profile.ejs', { username: req.session.passport.user })
+// })
+
+// app.get('/login', checkNotAuthenticated, (req, res) => {
+//   res.redirect("http://localhost:3000/login")
+// })
+
+// app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+//   successRedirect: 'http://localhost:3000/',
+//   failureRedirect: 'http://localhost:3000/',
+//   failureFlash: true
+// }))
+
+app.post('/login', checkNotAuthenticated, function(req, res, next) {passport.authenticate('local', function(err, user, info){
+  if(err){
+    return next(err);
   }
-  // res.render('profile.ejs', { username: req.session.passport.user })
-})
-
-app.get('/login', checkNotAuthenticated, (req, res) => {
-  res.send("NOt LOGIN")
-})
-
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-  successRedirect: 'http://localhost:3000/home',
-  failureRedirect: '/login',
-  failureFlash: true
-}))
+  if(!user){
+    return res.send("false");
+  }
+  req.logIn(user, function(err){
+    if(err){
+      return next(err);
+    }
+    return res.send("true");
+  });
+}) (req, res, next);
+});
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
   res.render('register.ejs')
@@ -128,13 +144,14 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
 })
 
 // Logging out from the session
-app.delete('/logout', (req, res) => {
+app.delete('/api/logout', (req, res) => {
   req.session.destroy(() => {
     console.log('session destroyed')
   })
   req.logOut()
-  res.redirect('/login')
+  res.send("{'result':true}")
 })
+
 // Create Comment (user side)
 app.post("/comments/:name",(req,res)=> {
   var new_comment_id;
@@ -629,7 +646,6 @@ app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
 // get user object if logged in
 app.get('/api/userloggedin', (req, res) => {
   if (req.session.passport){
-    console.log("user is auth.")
     User.findOne({username: req.session.passport.user}, (err, user) => {
     if (err)
       res.send(err)
@@ -639,8 +655,28 @@ app.get('/api/userloggedin', (req, res) => {
     })
   }
   else res.send(undefined)
-  
 })
+
+// app.get('/api/userloggedin', (req, res) => {
+//   if (req.session.passport){
+//     console.log("user is auth.")
+//     User.findOne({username: req.session.passport.user}, (err, user) => {
+//     if (err)
+//       res.send(err)
+//     else {
+//       if (user.user_type == 'admin') {
+//         res.redirect('http://localhost:3000/admin')
+//       } else if (user.user_type == 'user') {
+//         res.redirect('http://localhost:3000/home')
+//       }
+//     }
+//     })
+//   }
+//   else res.send(undefined)
+
+// })
+
+
 // app.get('/userloggedin/:usename',  (req, res) => {
 //   console.log(req.params.username)
 //   User.findOne({usename: req.params.username},  (err, user) => {
