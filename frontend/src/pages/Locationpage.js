@@ -174,13 +174,15 @@ function deleteComment(commentId, user_id) {
     })
       .then(() => {
         // alert("Comment deleted")
-        document.getElementById("comment" + commentId).remove();
+        console.log(commentId)
+        console.log(document.querySelector("#comment" + commentId));
+        document.querySelector("#comment" + commentId).remove();
       })
-      .catch((err) => {
-          err.then((err) => {
-              alert("error:" + err);
-          })
-      })
+      // .catch((err) => {
+      //     err.then((err) => {
+      //         alert("error:" + err);
+      //     })
+      // })
   }
 
 function CommentArea() {
@@ -252,15 +254,26 @@ function addComment(user_id) {
           document.getElementById("commentBox").value = "";
           
           let data = JSON.parse(res);
-          let newComment = 
-          "<div id='comment" + data.comment_id + "'>" +
-            "<h4>User: " + data.user_id + "</h4>" + 
-            "<p>Content: " + data.content + "</p>" + 
-            "<button type='button' id='" + data.comment_id + "' class='btn btn-primary'>Delete Comment</Button>" +
-            "<hr></hr>" +
-          "</div>"
+
+          let node = document.createElement("button");
+          node.type = "button";
+          node.className = "btn btn-primary";
+          node.innerHTML = "Delete Comment";
+          console.log(data.comment_id)
+          node.onclick = fun => {deleteComment(data.comment_id, user_id)};
+
+          let commentnode = document.createElement("div");
+          commentnode.id = "comment" + data.comment_id;
           
-          document.getElementById("commentArea").innerHTML += newComment;
+          let newComment = 
+            "<h4>User: " + data.user_id + "</h4>" + 
+            "<p>Content: " + data.content + "</p>";
+            commentnode.innerHTML = newComment;
+
+          commentnode.appendChild(node);
+          
+          
+          document.getElementById("commentArea").appendChild(commentnode);
           console.log(newComment);
       })
       .catch((err) => {
