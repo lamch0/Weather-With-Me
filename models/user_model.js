@@ -1,3 +1,9 @@
+// 1155143373 Lam Lok Hin 
+// 1155143281 Choi Chung Yu 
+// 1155142376 Cheung King Wa 
+// 1155110159 Cheung Hing Wing 
+// 1155142672 Kwok Chun Yin
+// 1155143825 Lam Cheuk Hin
 // this is the schema for user model
 
 const mongoose = require('mongoose');
