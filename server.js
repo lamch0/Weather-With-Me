@@ -59,7 +59,7 @@ app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: 10,
   resave: false,
   saveUninitialized: false,
   name: "userInSession"
@@ -181,10 +181,7 @@ app.post("/comments/:name",(req,res)=> {
                           else{
                             loc.comments.push(fcom._id);
                             await loc.save();
-                            res.status(201).send("{<br>"+
-                            '"comment_id": ' + fcom.comment_id + ",<br>"+
-                            '"user_id": <br>{<br>"user_id": '+ fcom.user_id +',<br>}<br>'
-                            +'"content": '+fcom.content + "<br>}<br>");
+                            res.status(201).send(fcom);
                           }
                       })
                     }
