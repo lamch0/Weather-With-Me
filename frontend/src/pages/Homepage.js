@@ -49,7 +49,16 @@ function Homepage() {
         <div id='text' onClick={()=>{window.location.pathname="/favourite/"+username.username}}>Favourite</div>
         <div id='vertical-line'></div>
         <div id='icon'><Md.MdLogout/></div>
-        <div id='text'>Logout</div>
+        <div id='text' onClick={()=>{
+          axios
+          .delete("http://localhost:8000/api/logout", {withCredentials:true})
+          .then((res) => {
+              window.location.reload(false);
+          })
+          .catch((err) => {
+              alert(err);
+          })
+        }}>Logout</div>
 
       </div>
     </div>
