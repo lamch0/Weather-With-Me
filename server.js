@@ -576,39 +576,53 @@ app.get('/api/location/get/id?', (req, res) => {
 });
 //===========================End Get one location part=====================================
 
-// Add location to fav_loc list of user, eg '/favourite/ryan/10'
+// Add location to fav_loc list of user, eg '/api/favourite/ryan/10'
 app.put('/api/favourite/:username/:loc_id', (req, res) => {
   // User.find({ username: req.session.passport.user }, (err, user) => {
   // console.log(req.params)
-  User.findOne({ username: req.params.username }, async (err, user) => {
+  User.findOne({ username: req.params.username }, (err, user) => {
     if (err)
-      res.send('Error: cannot find user')
+      res.send(Err)
     else if (!user)
       res.send('No such user')
     else {
       console.log(user)
-      if (!user.fav_loc.includes(req.params.loc_id)){
-        user.fav_loc.push(req.params.loc_id)
-        await user.save()
-      }
-      // console.log(user)
-      res.send(user)
+      Location.findOne({loc_id: req.params.loc_id}, async (err, loc) => {
+        if (err)
+          res.send(err)
+        else {
+          if (!user.fav_loc.includes(loc._id)){
+            user.fav_loc.push(loc._id)
+            await user.save()
+          }
+          console.log(user)
+          res.send(user)
+        }
+      })
     }
   })
 })
 
-// Get list of fav_loc of one user
-app.get('/api/favourite', (req, res)=> {
-  User.findOne({username: req.session.passport.user}, (err, e)=> {
+// Get list of fav_loc of one user  eg '/api/favourite/ryan'
+app.get('/api/favourite/:username', (req, res)=> {
+  // User.findOne({username: req.session.passport.user}, (err, e)=> {
+  //   if (err)
+  //     res.send(err)
+  //   else {
+  //    res.send(e.fav_loc)
+  //   }
+  // })
+  User.findOne({username: req.params.username})
+  .populate("fav_loc")
+  .exec(function (err, user) {
     if (err)
       res.send(err)
-    else {
-     res.send(e.fav_loc)
-    }
+    else
+      res.send(user.fav_loc)
   })
 })
 
-// Delete loc from fav_loc 
+// Delete loc from fav_loc  eg '/api/favourite/delete/ryan/1'
 app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
   User.findOne({ username: req.params.username }, async (err, user) => {
     if (err)
@@ -616,14 +630,20 @@ app.put('/api/favourite/delete/:username/:loc_id', (req, res) => {
     else if (!user)
       res.send('No such user')
     else {
-      console.log("Old user: "+user)
-      const index = user.fav_loc.indexOf(req.params.loc_id)
-      if (index > -1){
-        user.fav_loc.splice(index, 1)
-      }
-      console.log("New user: "+user)
-      await user.save()
-      res.send(user)
+      // console.log(user)
+      Location.findOne({ loc_id: req.params.loc_id }, async (err, loc) => {
+        if (err)
+          res.send(err)
+        else {
+          const index = user.fav_loc.indexOf(loc._id)
+          if (index > -1){
+            user.fav_loc.splice(index, 1)
+          }
+          // console.log(user)
+          await user.save()
+          res.send(user)
+        }
+      })
     }
   })
 })
