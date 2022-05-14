@@ -199,7 +199,7 @@ app.post("/comments/:name",(req,res)=> {
 })
 // ============================== End of Create comment section ========================================
 //Delete Comment (user side)
-app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
+app.delete("/comments/delete/:name/:comment_id",(req,res)=>{
   Comment.findOne({comment_id: req.params['comment_id']},(err,e) =>{
     if(err)
     {res.send(err)}
@@ -215,7 +215,7 @@ app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
           res.status(404).send("Could not delete it because you are not the owner of the comment.");
         }
         else{
-        Location.findOne({loc_id: req.params['loc_id']}).exec(async(err,loc)=>{
+        Location.findOne({name: req.params['name']}).exec(async(err,loc)=>{
           if(err)
             {res.send(err)}
           else{
@@ -239,6 +239,18 @@ app.delete("/comments/delete/:loc_id/:comment_id",(req,res)=>{
   })
 })
 // ============================== End of Delete comment section ========================================
+// Get location comment list
+app.get('/api/location/getcomment/?name', (req, res) => {
+    Location.findOne({ name: req.query["name"] })
+    .populate("comments")
+    .exec(function (err, loc) {
+        if (err)
+            res.send(err);
+        else 
+            res.send(loc.comments);
+    });
+  });
+// ============================== End of Get comment section ========================================
 //Create Location (admin side)
 app.post("/api/location",(req,res)=>{
   var new_location_id;
