@@ -3,6 +3,7 @@ import "./App.css"
 import Homepage from './pages/Homepage.js'
 import Admin from './pages/Adminsite.js'
 import Request from './pages/Adminsite.js'
+import Favourite from './pages/Favourite'
 import Locationpage from './pages/Locationpage.js'
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import * as Ti from "react-icons/ti";
@@ -131,8 +132,8 @@ function App() {
                 <Routes>
                     
                 <Route path='/' element={<Homepage/>} />
+                <Route path='/favourite/:username' element={<Favourite/>} />
                 <Route path='/Singlelocation/:location' element={<Locationpage/>} />
-    
                 </Routes>
                 </Router>
                 </div>
