@@ -10,18 +10,8 @@ import axios from "axios";
 
 
 function Admin(){
-    const [table, setTable] = useState(0);
-    // let location = [];
-    // let lat = [];
-    // let long = [];
-    // let localtime = [];
-    // let temp_c = [];
-    // let wind_kph = [];
-    // let wind_dir = [];
-    // let humidity = [];
-    // let precip_mm = [];
-    // let vis_km = [];
-    let info = [];
+    const [state, setState] = useState(0);
+    const [info, setInfo] = useState([]);
 
     function logout(){
         axios
@@ -63,39 +53,7 @@ function Admin(){
                         <UserUpdate/>
                     </div>
                 </div>
-                {table == 1 && 
-                <div className="table">
-                    <table>
-                        <tr>
-                            <td>Name</td>
-                            <td>Latitude</td>
-                            <td>Longitude</td>
-                            <td>Local Time</td>
-                            <td>Temp_c</td>
-                            <td>Wind KPH</td>
-                            <td>Wind DIR</td>
-                            <td>Humidity</td>
-                            <td>Precip_mm</td>
-                            <td>Vis_km</td>
-                        </tr>
-                        {info.map((index, element) =>  {
-                            {console.log(element)}
-                            <tr>
-                            <td>{element[0]}</td>
-                            <td>{element[1]}</td>
-                            <td>{element[2]}</td>
-                            <td>{element[3]}</td>
-                            <td>{element[4]}</td>
-                            <td>{element[5]}</td>
-                            <td>{element[6]}</td>
-                            <td>{element[7]}</td>
-                            <td>{element[8]}</td>
-                            <td>{element[9]}</td>
-                            </tr>
-                        })}
-                    </table>
-                </div>
-                }
+                {state == 1 && <Table info={info}/>}
             </div>
         </>
     )
@@ -104,8 +62,6 @@ function Admin(){
 
 
 function Update(){
-    const [state, setState] = useState(0);
-
 
     function refresh(){
         setState(0);
@@ -117,6 +73,7 @@ function Update(){
         })
         .then((res) => {
             res = JSON.parse(res);
+            let inform = [];
             for(let i = 0; i < 2; i++){
                 let check = [];
                 fetch("http://api.weatherapi.com/v1/current.json?key=248213d7f27a4c5ea2274830221205&q=" + res[i].name + "&aqi=no", {
@@ -140,11 +97,11 @@ function Update(){
                     check.push(res.current.humidity);
                     check.push(res.current.precip_mm);
                     check.push(res.current.vis_km);
-                    info.push(check);
-                    setTable(1);
-                    if(i == res.length-1){
+                    inform.push(check);
+                    
+                    if(i == 1){
                         setState(1);
-                        setTable(1);
+                        setInfo(inform);
                     }
                 })
             }
@@ -158,7 +115,6 @@ function Update(){
                 <h5 className="card-title">Request Data</h5>
                 <p className="card-text">Fetch all the data from weatherapi</p>
                 <button className="btn btn-primary" onClick={()=>refresh()}>Request</button>
-                {state==1 && <span className="update-span">Done !</span>}
             </div>
         </div>
     )
@@ -572,6 +528,43 @@ function LocationUpdate(){
             </div>
         </div>
     )
+}
+
+function Table({info}){
+    return(
+    <div className="text-center">
+                    <table className="table">
+                        <tbody>
+                            <tr>
+                                <td>Name</td>
+                                <td>Latitude</td>
+                                <td>Longitude</td>
+                                <td>Local Time</td>
+                                <td>Temp_c</td>
+                                <td>Wind KPH</td>
+                                <td>Wind DIR</td>
+                                <td>Humidity</td>
+                                <td>Precip_mm</td>
+                                <td>Vis_km</td>
+                            </tr>
+                            {info.map((element, index) =>  {
+                                return(
+                                <tr>
+                                <td>{element[0]}</td>
+                                <td>{element[1]}</td>
+                                <td>{element[2]}</td>
+                                <td>{element[3]}</td>
+                                <td>{element[4]}</td>
+                                <td>{element[5]}</td>
+                                <td>{element[6]}</td>
+                                <td>{element[7]}</td>
+                                <td>{element[8]}</td>
+                                <td>{element[9]}</td>
+                                </tr>)
+                            })}
+                        </tbody>
+                    </table>
+                </div>)
 }
 
 }
