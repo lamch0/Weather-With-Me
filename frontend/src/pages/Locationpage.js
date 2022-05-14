@@ -145,7 +145,8 @@ function deleteComment(commentId) {
       method: "DELETE"
     })
       .then(() => {
-        alert("Comment deleted");
+        // alert("Comment deleted")
+        document.getElementById("comment" + commentId).remove();
       })
       .catch((err) => {
           err.then((err) => {
@@ -167,18 +168,20 @@ function CommentArea() {
 
     try{
       console.log("comment: " + comments)
+
+    let userid = "1652344369760";
     
     return (
       <>
         <h1 className="text-center">Comment Area</h1>
-        <div className="commentArea">
+        <div id="commentArea">
           {comments.map((comment) => 
           <>
           <div id={"comment" + comment.comment_id}>
-          <h4>User: {comment.user_id}</h4>
-          <p>Content: {comment.content} {comment.comment_id}</p>
-          <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id)}>Delete Comment</Button>
-          <hr></hr>
+            <h4>User: {comment.user_id}</h4>
+            <p>Content: {comment.content} {comment.comment_id}</p>
+            {comment.user_id == userid ? <Button id={comment.comment_id} onClick={deleteComment.bind(this, comment.comment_id)}>Delete Comment</Button> : ""}
+            <hr></hr>
           </div>
         </>)}
         </div>
@@ -198,10 +201,11 @@ function addComment() {
       return;
   } else {
     let comment = document.getElementById("commentBox").value;
-    console.log(comment);
+    let userid = "1652344369760";
+    console.log(userid, comment);
   
   
-  let bodytext = "user_id=1652344369760" + "&content=" + comment;
+  let bodytext = "user_id=" + userid + "&content=" + comment;
 
   fetch("http://localhost:8000/api/comments/" + loc, {
       method: "POST",
@@ -215,7 +219,18 @@ function addComment() {
       })
       .then((res) => {
           document.getElementById("commentBox").value = "";
-          console.log(res);
+          
+          let data = JSON.parse(res);
+          let newComment = 
+          "<div id='comment" + data.comment_id + "'>" +
+            "<h4>User: " + data.user_id + "</h4>" + 
+            "<p>Content: " + data.content + " " + data.comment_id + "</p>" + 
+            "<button type='button' id='" + data.comment_id + "' class='btn btn-primary'>Delete Comment</Button>" +
+            "<hr></hr>" +
+          "</div>"
+          
+          document.getElementById("commentArea").innerHTML += newComment;
+          console.log(newComment);
       })
       .catch((err) => {
           console.log(err);
