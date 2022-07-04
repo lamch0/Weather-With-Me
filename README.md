@@ -1,4 +1,4 @@
-# CSCI2720_proj
+# Weather With Me
 
 The application requires frontend and backend server.
 
